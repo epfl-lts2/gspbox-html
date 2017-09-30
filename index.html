@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="include/header.html">
+<link rel="stylesheet" href="include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="include/style.css" type="text/css">
+<link rel="stylesheet" href="include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>The Graph Signal Processing Toolbox</title>
+</head>
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container --!>
+<div class="container">
+<!-- Include main navigation -->
+<div class="masthead include" file="include/mainnav.html"></div>
+
+<div class="row">
+    <div class="col-md-10"><div class="jumbotron">
+    <p><a href="doc/demos/gsp_demo.php"><img src="gspfrontpage.png"></a></p>
+    <p class="lead">
+    The <strong style="color: #08c;">Graph Signal Processing toolbox </strong> is an easy to use matlab toolbox that performs a wide variety of operations on graphs, from simple ones like filtering to advanced ones like interpolation or graph learning. You can create all sorts of filterbanks including wavelets and Gabor. It is based on spectral graph theory and many of the features can scale to very large graphs.
+    </p>
+
+    <p>The GSPBOX is developed at the Signal Processing Laboratory <a href="http://lts2www.epfl.ch/">LTS2</a> of the Ecole Polytechnique Fédérale de Lausanne <a href="http://www.epfl.ch">EPFL</a>  </p>
+
+    <p>The toolbox is <a title="definitions of free and non-free software"
+      href="http://www.gnu.org/philosophy/categories.html">Free</a> software, released under the GNU General Public License (GPLv3).</p>
+    <a class="btn btn-large btn-success" href="https://github.com/epfl-lts2/gspbox/releases/latest">Download the GSPBox</a><br/> 
+
+    <hr>
+
+    <div class="row-fluid">
+      
+      <div class="span4">
+        <h2 class="titlepage"><a name="features">Features</a></h2>
+        <ul>
+          <li>Graph Fourier transform</li>
+          <li>Graph wavelet transform</li>
+          <li>Graph Gabor transform</li> 
+          <li>Graph pyramid</li>
+          <li>Graph kron reduction</li>
+          <li>Fast transform using Chebysheff polynomial</li>
+          <li>Graph plotting</li>
+          <li>Demos demonstrating the use of the toolbox</li>
+          <li>Works in Matlabwith a backend in C for greater speed</li>
+          <li>The toolbox is <a title="definitions of free and non-free software"
+          href="http://www.gnu.org/philosophy/categories.html">Free</a> software, released under the GNU General Public License (GPLv3)</li>
+        </ul>
+      </div><!--</span4>-->
+
+    <div class="span4">
+      <h2 class="titlepage"><a name="documentation">Documentation</A></h2>
+        You can read the <a href="doc/start/">online documentation</a> or download the entire documentation as a single <a href="gspbox.pdf">pdf file</a>.<p>
+    </div><!--</span4>-->
+    
+    <div class="span4">
+      <h2 class="titlepage"><a name="publication">Publications</a></h2>
+      <p>
+      If you use the toolbox in a scientic work, please cite:
+      </p>
+      <blockquote>Perraudin Nathanaël, Johan Paratte, David Shuman, Lionel Martin, Vassilis Kalofolias, Pierre Vandergheynst and David K. Hammond}, <i>GSPBOX: A toolbox for signal processing on graphs</i>. Arxiv e-print, 08-2014. <a href="gspbox.bib">[bibtex]</a></blockquote>
+      <p>available from <a href="http://arxiv.org/abs/1408.5781">here</a>. This will help in securing a continued development of the toolbox.</p>
+    </div>
+  </div><!--</row-fluid>-->
+
+    <!-- footer -->
+
+  <div class="include" file="include/footer.html"></div>
+</div><!--</container>-->
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="include/gspbox.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+
+

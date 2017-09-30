@@ -1,0 +1,212 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_GRAPH_DEFAULT_PARAMETERS - load default parameters for graphs</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_graph_default_parameters.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p></p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_GRAPH_DEFAULT_PARAMETERS - load default parameters for graphs</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span>G <span class="p">=</span><span class="w"> </span><span class="nf">gsp_graph_default_parameters</span><span class="p">(</span>G<span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_GRAPH_DEFAULT_PARAMETERS load default parameters for graphs</span>
+<span class="c">%   Usage: G = gsp_graph_default_parameters(G);</span>
+<span class="c">%          G = gsp_graph_default_parameters();</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters</span>
+<span class="c">%       G   : Graph (Optional)</span>
+<span class="c">%   Output parameters</span>
+<span class="c">%       G   : Graph</span>
+<span class="c">% </span>
+<span class="c">%   This function will fill a graph with all missing parameters such that</span>
+<span class="c">%   it is compabatible with all functions of the GSPBox. If you create a</span>
+<span class="c">%   graph manually, you need to set only the weight matrix W. If you have</span>
+<span class="c">%   some coordonate, you can also set G.coords. G.coords is a N x 2</span>
+<span class="c">%   or a N x 3 matrix with each columns beeing the coordonates in each</span>
+<span class="c">%   dimention. Finally, we recommend to set the fiel G.type with a name</span>
+<span class="c">%   that suits your graph.</span>
+<span class="c">%</span>
+<span class="c">%   Example:</span>
+<span class="c">%          </span>
+<span class="c">%          W = rand(30);</span>
+<span class="c">%          W = (W + W&#39;)/2;</span>
+<span class="c">%          G.W = W - diag(diag(W));</span>
+<span class="c">%          G = gsp_graph_default_parameters(G)</span>
+<span class="c">%</span>
+<span class="c">%   This function can be used to update the weights of your graph. It will</span>
+<span class="c">%   recompute the Laplacian operator. Warning this function does not</span>
+<span class="c">%   perform any change to the Fourier basis:</span>
+<span class="c">%</span>
+<span class="c">%          G.W = Wnew;</span>
+<span class="c">%          G = gsp_graph_default_parameters(G);</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   List of parameters of the graph structure</span>
+<span class="c">%   -----------------------------------------</span>
+<span class="c">%</span>
+<span class="c">%   By default, a graph structure in the GSPbox contains the following</span>
+<span class="c">%   parameters:</span>
+<span class="c">%   </span>
+<span class="c">%    G.W*: Weight matrix (empty by default)</span>
+<span class="c">%    G.A*: Adacency matrix (constructed with W*)</span>
+<span class="c">%    G.N*: Number of nodes (size(W,1))</span>
+<span class="c">%    G.type*: Type of graph (&#39;unknown&#39; by default)</span>
+<span class="c">%    G.directed*: 1 if the graph is directed, 0 if not</span>
+<span class="c">%    G.lap_type*: Laplacian type (default &#39;combinatorial&#39;) See the</span>
+<span class="c">%     function GSP_CREATE_LAPLACIAN for a exhaustive list of the</span>
+<span class="c">%     available laplacians.</span>
+<span class="c">%    G.d*: Degree vector (Computed with G.W*)</span>
+<span class="c">%    G.Ne*: Number of edges</span>
+<span class="c">%    G.coords*: Coordinates of the vertices (default (0,0) )</span>
+<span class="c">%    G.plotting*: Plotting parameters</span>
+<span class="c">%      G.plotting.edge_width*: Width of edges (default 1)</span>
+<span class="c">%      G.plotting.edge_color*: Color of edges (default [255,88,41]/255 )</span>
+<span class="c">%      G.plotting.edge_style*: Style of edges (default &#39;-&#39;)</span>
+<span class="c">%      G.plotting.vertex_size*: Size of vertex (default 50)</span>
+<span class="c">%      G.plotting.vertex_color*: Color of vertex (default &#39;b&#39;)</span>
+<span class="c">%   </span>
+<span class="c">%   Remark: There is redudancy between A, W, L. However, the GSPBox</span>
+<span class="c">%   is done in matlab and is not suppose yet to scale to graph sufficiently</span>
+<span class="c">%   large that your matlab have memory problem. However, this will be most</span>
+<span class="c">%   likely change for milestone 1.0.0. If you do have a urgent need to</span>
+<span class="c">%   overcome this problem, please contact the devolper team.</span>
+<span class="c">%          </span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/graphs/gsp_graph_default_parameters.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+<span class="c">% Author: Nathanael Perraudin</span>
+<span class="c">% Date  : 09.12.2013</span>
+
+<span class="k">if</span> <span class="n">nargin</span><span class="o">&lt;</span><span class="mi">1</span>
+    <span class="n">G</span><span class="p">=</span><span class="n">struct</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;W&#39;</span><span class="p">)</span> <span class="c">% Weight matrix</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">W</span> <span class="p">=</span> <span class="n">sparse</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="k">end</span>
+
+<span class="n">G</span><span class="p">.</span><span class="n">A</span><span class="p">=</span><span class="n">sparse</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">W</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">G</span><span class="p">.</span><span class="n">N</span> <span class="p">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+
+
+<span class="c">% Type of graph</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;type&#39;</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">type</span><span class="p">=</span><span class="s">&#39;unknown&#39;</span><span class="p">;</span> 
+<span class="k">end</span><span class="p">;</span> 
+
+<span class="c">% if ~isfield(G,&#39;directed&#39;)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">directed</span> <span class="p">=</span> <span class="n">gsp_isdirected</span><span class="p">(</span><span class="n">G</span><span class="p">);</span> 
+<span class="c">% end; </span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;hypergraph&#39;</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">hypergraph</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> 
+<span class="k">end</span><span class="p">;</span> 
+
+<span class="c">% Create the graph Laplacian</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;lap_type&#39;</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">lap_type</span><span class="p">=</span><span class="s">&#39;combinatorial&#39;</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="c">% if ~isfield(G,&#39;L&#39;)</span>
+    <span class="n">G</span> <span class="p">=</span> <span class="n">gsp_create_laplacian</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+<span class="c">% end</span>
+
+<span class="n">G</span><span class="p">.</span><span class="n">d</span> <span class="p">=</span> <span class="n">full</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">W</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
+
+<span class="c">% Number of edges</span>
+<span class="k">if</span> <span class="n">G</span><span class="p">.</span><span class="n">directed</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Ne</span> <span class="p">=</span> <span class="n">nnz</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">W</span><span class="p">);</span>
+<span class="k">else</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Ne</span> <span class="p">=</span> <span class="n">nnz</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">W</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;coords&#39;</span><span class="p">)</span> <span class="c">% Coordonates</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">coords</span> <span class="p">=</span> <span class="p">[];</span> 
+<span class="k">end</span>
+
+<span class="n">G</span> <span class="p">=</span> <span class="n">gsp_graph_default_plotting_parameters</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+
+<span class="k">end</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

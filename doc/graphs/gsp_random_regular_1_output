@@ -1,0 +1,16 @@
+G = 
+
+  struct with fields:
+
+          type: 'random_regular'
+             W: [100×100 double]
+             A: [100×100 logical]
+             N: 100
+      directed: 0
+    hypergraph: 0
+      lap_type: 'combinatorial'
+             L: [100×100 double]
+             d: [100×1 double]
+            Ne: 150
+        coords: []
+      plotting: [1×1 struct]

@@ -1,0 +1,242 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_DEMO_GRAPH_EMBEDDING - Demonstration file for graph embeddings</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_demo_graph_embedding.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p><div id="menutitle">See also:</div>
+<ul>
+<li><a href="#BASEURL#/doc/graphs/gsp_nn_graph.html">gsp_nn_graph</a></li>
+<li><a href="#BASEURL#/doc/embedding/gsp_compute_coordinates.html">gsp_compute_coordinates</a></li>
+<li><a href="#BASEURL#/doc/graphs/gsp_update_coordinates.html">gsp_update_coordinates</a></li>
+<li><a href="#BASEURL#/doc/plotting/gsp_plot_signal.html">gsp_plot_signal</a></li>
+</ul>
+</p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_DEMO_GRAPH_EMBEDDING - Demonstration file for graph embeddings</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="c">%GSP_DEMO_GRAPH_EMBEDDING Demonstration file for graph embeddings</span>
+<span class="c">%</span>
+<span class="c">%   In this demo we perform a low-dimensional embedding on a specific graph</span>
+<span class="c">%   using three different algorithms and we plot the resulting embeddings</span>
+<span class="c">%   on a single plot. At first we create a 2-D sensor graph embedded in a</span>
+<span class="c">%   3-D space. We then compute 3 different embeddings for this graph:</span>
+<span class="c">%   Laplacian eigenmaps, LLE, and Isomap.</span>
+<span class="c">%</span>
+<span class="c">%   Laplacian eigenmaps</span>
+<span class="c">%   -------------------</span>
+<span class="c">%</span>
+<span class="c">%   This function uses the Laplacian of the graph and the diagonal degree</span>
+<span class="c">%   matrix to compute the eigenvalues and eigenvectors of generalized</span>
+<span class="c">%   eigenvector problem, L U =  D U Lambda. The coordinates of the</span>
+<span class="c">%   embedding are the eigenvectors that correspond to the bottom dim*</span>
+<span class="c">%   eigenvalues (ignoring always the zero eigenvalue).</span>
+<span class="c">%</span>
+<span class="c">%   Locally Linear Embedding (LLE) </span>
+<span class="c">%   ------------------------------</span>
+<span class="c">%</span>
+<span class="c">%   This method first converts the weighed adjacency matrix to a distance</span>
+<span class="c">%   matrix. Then it computes another weight matrix A by minimizing each</span>
+<span class="c">%   reconstruction error epsilon = X -SUM_J A_J X_J ^2 where the</span>
+<span class="c">%   x_j are the neighboors of x. To do so we first compute the</span>
+<span class="c">%   following local covariance matrix:</span>
+<span class="c">%</span>
+<span class="c">%      C_{jk} = \frac{1}{2} (D_{:, j}+D_{i, :}-D_{ij}-D_{:,:})</span>
+<span class="c">%</span>
+<span class="c">%   where D_{ij} is the squared distance matrix,</span>
+<span class="c">%   </span>
+<span class="c">%      D_{:, j} = \frac{1}{n} \sum_i D_{ij},</span>
+<span class="c">%      D_{i,:} = \frac{1}{n} \sum_j D_{ij},</span>
+<span class="c">%      D_{:,:} = \frac{1}{n^2} \sum_i \sum_j D_{ij},</span>
+<span class="c">%</span>
+<span class="c">%   and where D is the n by n squared distance matrix (D = d^2).</span>
+<span class="c">%   One can observe that the local covariance matrix is simply a</span>
+<span class="c">%   Multi-Dimensional Scaling (MDS) of the squared distance matrix D.</span>
+<span class="c">%</span>
+<span class="c">%   We calculate the weight matrix A by solving the system of linear</span>
+<span class="c">%   equations sum_k C_{jk}a_k=1 and rescale the weights so that any</span>
+<span class="c">%   column of A sums up to 1. Finally the coordinates of the embedding are</span>
+<span class="c">%   the eigenvectors of the matrix M = (I - A)^T(I - A). More precisely</span>
+<span class="c">%   the coordinates of the embedding are the eigenvectors that correspond</span>
+<span class="c">%   to the dim+1 bottom eigenvalues of M (we always ignore the first</span>
+<span class="c">%   eigenvector since the first eigenvalue is always zero) leaving us with</span>
+<span class="c">%   a dim dimensional embedding.</span>
+<span class="c">%</span>
+<span class="c">%   Isomap</span>
+<span class="c">%   ------</span>
+<span class="c">%</span>
+<span class="c">%   This algorithm computes the embedding using the distance matrix d.</span>
+<span class="c">%   Firstly we compute the dijkstra distance of all possible nodes of the</span>
+<span class="c">%   graph. We store these values squared in a matrix D where D_{ij} is</span>
+<span class="c">%   the squared dijkstra distance from node i to node j. Continuing we</span>
+<span class="c">%   performe a MDS on the squared dijkstra matrix D. This way we compute</span>
+<span class="c">%   Matrix B as</span>
+<span class="c">%</span>
+<span class="c">%      B_{jk} = 0.5 * (D_{:, j}+D_{i,:}-D_{ij}- D_{:,:}). </span>
+<span class="c">%</span>
+<span class="c">%   Finally the coordinates of the embedding are the eigenvectors that</span>
+<span class="c">%   corespond to the top dim eigenvalues. Finaly one can scale the</span>
+<span class="c">%   coordinates as X=Gamma Lambda ^{1/2} where Lambda is the</span>
+<span class="c">%   diagonal matrix of dim top eigenvalues of B and Gamma is the</span>
+<span class="c">%   matrix of the corresponding eigenvectors.</span>
+<span class="c">%</span>
+<span class="c">%   The signal on the graph is related to the coordinate information of the</span>
+<span class="c">%   original graph and therefore allows us to evaluate the resulting</span>
+<span class="c">%   embedding by looking at the smoothness of this signal on the graph. </span>
+<span class="c">%</span>
+<span class="c">%   Figure 1: Resulting embeddings</span>
+<span class="c">%</span>
+<span class="c">%      </span>
+<span class="c">%</span>
+<span class="c">%   See also: gsp_nn_graph, gsp_compute_coordinates,</span>
+<span class="c">%   gsp_update_coordinates, gsp_plot_signal </span>
+<span class="c">%</span>
+<span class="c">%   References:</span>
+<span class="c">%     L. K. Saul and S. T. Roweis. An introduction to locally linear</span>
+<span class="c">%     embedding. unpublished. Available at: http://www. cs. toronto. edu/~</span>
+<span class="c">%     roweis/lle/publications. html, 2000.</span>
+<span class="c">%     </span>
+<span class="c">%     M. Belkin and P. Niyogi. Laplacian eigenmaps and spectral techniques</span>
+<span class="c">%     for embedding and clustering. In NIPS, volume 14, pages 585--591, 2001.</span>
+<span class="c">%     </span>
+<span class="c">%     J. B. Tenenbaum, V. De Silva, and J. C. Langford. A global geometric</span>
+<span class="c">%     framework for nonlinear dimensionality reduction. Science,</span>
+<span class="c">%     290(5500):2319--2323, 2000.</span>
+<span class="c">%     </span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/demos/gsp_demo_graph_embedding.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+<span class="c">% Authors : Dion O. E. Tzamarias</span>
+<span class="c">% Date    : 20/11/2015</span>
+
+<span class="c">%% Initialization</span>
+<span class="n">clear</span>
+<span class="n">close</span> <span class="n">all</span>
+
+<span class="c">% Call gsp_BOX</span>
+<span class="n">gsp_start</span>
+<span class="n">gsp_reset_seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c">% General parameters</span>
+<span class="n">n</span> <span class="p">=</span> <span class="mi">400</span><span class="p">;</span>    <span class="c">% number of nodes</span>
+<span class="n">paramnn</span><span class="p">.</span><span class="n">k</span> <span class="p">=</span> <span class="mi">6</span><span class="p">;</span> <span class="c">% number of nearest neighbors for the graph</span>
+<span class="n">dim</span> <span class="p">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c">% embedding dimentionality</span>
+
+<span class="c">%% Create a 2-d plane embeded in a 3-dimensional space</span>
+
+<span class="c">% Generate graph</span>
+<span class="n">alpha</span> <span class="p">=</span> <span class="nb">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="p">[</span><span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">]</span> <span class="p">=</span> <span class="n">qr</span><span class="p">(</span><span class="nb">randn</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+<span class="n">coords</span> <span class="p">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,:);</span>
+
+<span class="n">G</span> <span class="p">=</span> <span class="n">gsp_nn_graph</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="n">paramnn</span><span class="p">);</span>
+<span class="c">%% Compute new coordinates using different methods</span>
+
+<span class="n">new_c</span> <span class="p">=</span> <span class="n">gsp_compute_coordinates</span><span class="p">(</span><span class="n">G</span> <span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="s">&#39;lle&#39;</span><span class="p">);</span>
+<span class="n">G2</span> <span class="p">=</span> <span class="n">gsp_update_coordinates</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="n">new_c</span><span class="p">);</span>
+
+<span class="n">new_c2</span> <span class="p">=</span> <span class="n">gsp_compute_coordinates</span><span class="p">(</span><span class="n">G</span> <span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="s">&#39;laplacian_eigenmaps&#39;</span><span class="p">);</span>
+<span class="n">G3</span> <span class="p">=</span> <span class="n">gsp_update_coordinates</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">new_c2</span><span class="p">);</span>
+
+<span class="n">new_c3</span> <span class="p">=</span> <span class="n">gsp_compute_coordinates</span><span class="p">(</span><span class="n">G</span> <span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="s">&#39;isomap&#39;</span><span class="p">);</span>
+<span class="n">G4</span> <span class="p">=</span> <span class="n">gsp_update_coordinates</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">new_c3</span><span class="p">);</span>
+
+<span class="c">%% Plot the original coordinates on the new embeddings</span>
+
+<span class="n">figure</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">gsp_plot_graph</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&#39;Original graph&#39;</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&#39;LLE &#39;</span><span class="p">)</span>
+<span class="n">gsp_plot_signal</span><span class="p">(</span><span class="n">G2</span><span class="p">,</span><span class="n">alpha</span><span class="p">(:,</span><span class="mi">1</span><span class="p">));</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&#39;Laplacian eigenmaps&#39;</span><span class="p">)</span>
+<span class="n">gsp_plot_signal</span><span class="p">(</span><span class="n">G3</span><span class="p">,</span><span class="n">alpha</span><span class="p">(:,</span><span class="mi">1</span><span class="p">));</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&#39;Isomap&#39;</span><span class="p">)</span>
+<span class="n">gsp_plot_signal</span><span class="p">(</span><span class="n">G4</span><span class="p">,</span><span class="n">alpha</span><span class="p">(:,</span><span class="mi">1</span><span class="p">));</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

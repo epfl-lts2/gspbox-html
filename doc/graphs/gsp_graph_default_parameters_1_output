@@ -1,0 +1,13 @@
+G = 
+
+           W: [30x30 double]
+           A: [30x30 logical]
+           N: 30
+        type: 'unknown'
+    directed: 0
+    lap_type: 'combinatorial'
+           L: [30x30 double]
+           d: [1x30 double]
+          Ne: 870
+      coords: [30x2 double]
+    plotting: [1x1 struct]

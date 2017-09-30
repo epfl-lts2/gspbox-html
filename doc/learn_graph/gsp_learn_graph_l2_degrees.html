@@ -1,0 +1,187 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_LEARN_GRAPH_L2_DEGREES - Learn graph from pairwise distances using l2 prior on nodes degrees</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_learn_graph_l2_degrees_code.html">View the code</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p><div id="menutitle">See also:</div>
+<ul>
+<li><a href="#BASEURL#/doc/learn_graph/gsp_learn_graph_log_degrees.html">gsp_learn_graph_log_degrees</a></li>
+<li><a href="#BASEURL#/doc/utils/gsp_distanz.html">gsp_distanz</a></li>
+<li><a href="#BASEURL#/doc/graphs/gsp_update_weights.html">gsp_update_weights</a></li>
+</ul>
+</p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_LEARN_GRAPH_L2_DEGREES - Learn graph from pairwise distances using l2 prior on nodes degrees</h1>
+
+<div class="section" id="usage">
+<h2>Usage</h2>
+<pre class="literal-block">
+[W, stat] = gsp_learn_graph_l2_degrees(Z, a)
+[W, stat] = gsp_learn_graph_l2_degrees(Z, a, params)
+</pre>
+</div>
+<div class="section" id="xxxdescription">
+<h2>Description</h2>
+<dl class="docutils">
+<dt>Inputs:</dt>
+<dd>Z         : Matrix with (squared) pairwise distances of nodes
+a         : ||L||_F^2 prior constant   (bigger a -&gt; more dense W)
+params    : Optional parameters</dd>
+<dt>Outputs:</dt>
+<dd>W         : Weighted adjacency matrix
+stat      : Optional output statistics (adds small overhead)</dd>
+</dl>
+<p>'W = gsp_learn_graph_l2_degrees(Z, a, params)' computes a weighted
+adjacency matrix <span class="math">\(W\)</span> from squared pairwise distances in <span class="math">\(Z\)</span>, using the
+smoothness assumption that <span class="math">\(\text{trace}(X^TLX)\)</span> is small, where <span class="math">\(X\)</span> is
+the data (columns) changing smoothly from node to node on the graph and
+<span class="math">\(L = D-W\)</span> is the combinatorial graph Laplacian.</p>
+<p>Alternatively, Z can contain other types of distances and use the
+smoothness assumption that</p>
+<!-- sum(sum(W .* Z)) -->
+<div class="math">
+\begin{equation*}
+\sum_i\sum_j W_{ij}Z_{ij}
+\end{equation*}
+</div>
+<p>is small.</p>
+<p>The minimization problem solved is</p>
+<!-- minimize_W sum(sum(W .* Z)) + a/2 * ||W||_F^2/2 -->
+<!-- + a/2 * ||sum(W)||_2^2 -->
+<!-- s.t. sum(sum(W)) == n -->
+<div class="math">
+\begin{equation*}
+\min_W \sum_i\sum_j W_{ij}Z_{ij} +\frac{\alpha}{2}\|W\|_F^2  +\frac{\alpha}{2}\|W1\|_2^2 s.t. \|W\|=n
+\end{equation*}
+</div>
+<p>subject to <span class="math">\(W\)</span> being a valid weighted adjacency matrix (non-negative,
+symmetric, with zero diagonal). Note that</p>
+<!-- .||W||_F^2/2 + ||sum(W)||_2^2  = ||L||^2 -->
+<div class="math">
+\begin{equation*}
+\|W\|_F^2 + \|W1\|_2^2 = \|L\|_F^2
+\end{equation*}
+</div>
+<p>The algorithm used is forward-backward-forward (FBF) based primal dual
+optimization (see references).</p>
+<p>Example:</p>
+<pre class="literal-block">
+G = gsp_sensor(256);
+f1 = &#64;(x,y) sin((2-x-y).^2);
+f2 = &#64;(x,y) cos((x+y).^2);
+f3 = &#64;(x,y) (x-.5).^2 + (y-.5).^3 + x - y;
+f4 = &#64;(x,y) sin(3*((x-.5).^2+(y-.5).^2));
+X = [f1(G.coords(:,1), G.coords(:,2)), f2(G.coords(:,1), G.coords(:,2)), f3(G.coords(:,1), G.coords(:,2)), f4(G.coords(:,1), G.coords(:,2))];
+figure; subplot(2,2,1); gsp_plot_signal(G, X(:,1)); title('1st smooth signal');
+subplot(2,2,2); gsp_plot_signal(G, X(:,2)); title('2nd smooth signal');
+subplot(2,2,3); gsp_plot_signal(G, X(:,3)); title('3rd smooth signal');
+subplot(2,2,4); gsp_plot_signal(G, X(:,4)); title('4th smooth signal');
+Z = gsp_distanz(X').^2;
+[W] = gsp_learn_graph_l2_degrees(Z*25, 1);
+W(W&lt;1e-5) = 0;
+G2 = gsp_update_weights(G, W);
+figure; gsp_plot_graph(G2); title('Graph with edges learned from above 4 signals');
+</pre>
+<p><em>This code produces the following output</em>:</p>
+<pre class="literal-block">
+# iters: 1000. Rel primal: 1.9827e-04 Rel dual: 9.2639e-06   4.140e+02
+Time needed is 0.760525 seconds
+</pre>
+<img alt="gsp_learn_graph_l2_degrees_1_1.png" class="align-center" src="gsp_learn_graph_l2_degrees_1_1.png" />
+<img alt="gsp_learn_graph_l2_degrees_1_2.png" class="align-center" src="gsp_learn_graph_l2_degrees_1_2.png" />
+</div>
+<div class="section" id="additional-parameters">
+<h2>Additional parameters</h2>
+<ul class="simple">
+<li><em>params.W_init</em>   : Initialization point. default: zeros(size(Z))</li>
+<li><em>verbosity</em>       : Above 1 adds a small overhead. Default: 1</li>
+<li><em>maxit</em>           : Maximum number of iterations. Default: 1000</li>
+<li><em>tol</em>             : Tolerance for stopping criterion. Default: 1e-5</li>
+<li><em>step_size</em>       : Step size from the interval (0,1). Default: 0.5</li>
+</ul>
+<p>The stopping criterion is whether both relative primal and dual
+distance between two iterations are below a given tolerance.</p>
+<p>To set the step size use the following rule of thumb: Set it so that
+relative change of primal and dual converge with similar rates (use
+verbosity &gt; 1).</p>
+</div>
+<H2>References:</H2>
+
+
+
+<p><a name="kalofolias2016learn"></a>
+
+V.&nbsp;Kalofolias.
+ How to learn a graph from smooth signals.
+ Technical report, AISTATS 2016: proceedings at Journal of Machine
+  Learning Research (JMLR)., 2016.
+
+</p>
+
+<p><a name="komodakis2015playing"></a>
+
+N.&nbsp;Komodakis and J.-C. Pesquet.
+ Playing with duality: An overview of recent primal? dual approaches
+  for solving large-scale optimization problems.
+ <em>Signal Processing Magazine, IEEE</em>, 32(6):31--54, 2015.
+
+</p>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

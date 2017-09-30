@@ -1,0 +1,19 @@
+G = 
+
+  struct with fields:
+
+             N: 100
+            Ne: 400
+             W: [100×100 double]
+             E: {100×1 cell}
+          type: 'hypergraph from edges'
+      directed: 1
+    hypergraph: 1
+             A: [100×100 double]
+      lap_type: 'normalized'
+            de: [100×1 double]
+            dv: [100×1 double]
+             L: [100×100 double]
+             d: [100×1 double]
+        coords: []
+      plotting: [1×1 struct]

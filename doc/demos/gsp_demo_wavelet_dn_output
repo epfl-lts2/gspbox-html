@@ -1,0 +1,47 @@
+A function has both the prox and a grad fields. The gradient is used
+The time step is set manually to : 0.5
+Algorithm selected: FORWARD_BACKWARD 
+Iter 001:     prox_L1: ||A x-y||_1 = 0.000000e+00, REL_OB, iter = 2
+  f(x^*) = 1.635623e+01, rel_eval = 1.918014e+02
+Iter 002:     prox_L1: ||A x-y||_1 = 0.000000e+00, REL_OB, iter = 2
+  f(x^*) = 1.635623e+01, rel_eval = 0.000000e+00
+
+ FORWARD_BACKWARD:
+  f(x^*) = 1.635623e+01, rel_eval = 0.000000e+00
+ 2 iterations
+ Stopping criterion: REL_NORM_OBJ 
+
+A function has both the prox and a grad fields. The gradient is used
+The time step is set manually to : 0.5
+Algorithm selected: FORWARD_BACKWARD 
+Iter 001:     prox_L1: ||A x-y||_1 = 3.950718e+00, REL_OB, iter = 2
+  f(x^*) = 1.842782e+01, rel_eval = 1.307758e+00
+Iter 002:     prox_L1: ||A x-y||_1 = 1.905458e+00, REL_OB, iter = 2
+  f(x^*) = 1.490933e+01, rel_eval = 2.359922e-01
+Iter 003:     prox_L1: ||A x-y||_1 = 1.791944e+00, REL_OB, iter = 2
+  f(x^*) = 1.468075e+01, rel_eval = 1.556998e-02
+Iter 004:     prox_L1: ||A x-y||_1 = 1.829279e+00, REL_OB, iter = 2
+  f(x^*) = 1.457597e+01, rel_eval = 7.188845e-03
+Iter 005:     prox_L1: ||A x-y||_1 = 1.894864e+00, REL_OB, iter = 2
+  f(x^*) = 1.451468e+01, rel_eval = 4.222307e-03
+Iter 006:     prox_L1: ||A x-y||_1 = 1.952902e+00, REL_OB, iter = 2
+  f(x^*) = 1.446909e+01, rel_eval = 3.150956e-03
+Iter 007:     prox_L1: ||A x-y||_1 = 1.999188e+00, REL_OB, iter = 2
+  f(x^*) = 1.443249e+01, rel_eval = 2.536113e-03
+Iter 008:     prox_L1: ||A x-y||_1 = 2.032134e+00, REL_OB, iter = 2
+  f(x^*) = 1.440235e+01, rel_eval = 2.092857e-03
+Iter 009:     prox_L1: ||A x-y||_1 = 2.048022e+00, REL_OB, iter = 2
+  f(x^*) = 1.437391e+01, rel_eval = 1.978575e-03
+Iter 010:     prox_L1: ||A x-y||_1 = 2.053312e+00, REL_OB, iter = 2
+  f(x^*) = 1.434766e+01, rel_eval = 1.829546e-03
+Iter 011:     prox_L1: ||A x-y||_1 = 2.064799e+00, REL_OB, iter = 2
+  f(x^*) = 1.432871e+01, rel_eval = 1.322199e-03
+Iter 012:     prox_L1: ||A x-y||_1 = 2.076503e+00, REL_OB, iter = 2
+  f(x^*) = 1.431229e+01, rel_eval = 1.147399e-03
+Iter 013:     prox_L1: ||A x-y||_1 = 2.090651e+00, REL_OB, iter = 2
+  f(x^*) = 1.429848e+01, rel_eval = 9.659487e-04
+
+ FORWARD_BACKWARD:
+  f(x^*) = 1.429848e+01, rel_eval = 9.659487e-04
+ 13 iterations
+ Stopping criterion: REL_NORM_OBJ 

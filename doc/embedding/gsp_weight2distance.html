@@ -1,0 +1,121 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_WEIGHT2DISTANCE - Distance matrix from weight matrix</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_weight2distance_code.html">View the code</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p></p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_WEIGHT2DISTANCE - Distance matrix from weight matrix</h1>
+
+<div class="section" id="usage">
+<h2>Usage</h2>
+<pre class="literal-block">
+D = gsp_weight2distance(G);
+D = gsp_weight2distance(G, method);
+D = gsp_weight2distance(G, method, nnn);
+</pre>
+</div>
+<div class="section" id="input-parameters">
+<h2>Input parameters</h2>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option"><var>G</var></span></kbd></td>
+<td>Graph or weight matrix</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option"><var>method</var></span></kbd></td>
+<td>Type of kernel used to compute the weight matrix</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option"><var>sigma</var></span></kbd></td>
+<td>kernel paramter</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="output-parameters">
+<h2>Output parameters</h2>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option"><var>D</var></span></kbd></td>
+<td>Distance matrix (sparse)</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="xxxdescription">
+<h2>Description</h2>
+<p>This function uses the weight matrix of a graph in order to compute the
+distance matrix <span class="math">\(D\)</span>. If G is a structure it is considered as a graph
+otherwise it is considered as a weight matrix. The resulting matrix is
+in sparse form. The indices idx are of the nearest neighbors or (if k
+is not used) the indices of all non zero elements of the weight matrix.
+In both cases indices are saved in a cell where idx{ii} contains a
+vector jj of indices where D(ii, jj) are the Distances of the nearest
+neighbours of element ii.</p>
+<p>The type of <em>method</em> one can use are the following:
+* 'exp'        : exponential kernel (<span class="math">\(e^(\frac{-d_{ij}}{\sigma^2})\)</span>)
+* '1/x'        : inverse of x kernel (<span class="math">\(\frac{1}{\sigma+d_{ij}}\)</span>)
+* '1/x^2'      : inverse of x^2 kernel (<span class="math">\(\frac{1}{(\sigma+d_{ij})^2}\)</span>)
+* 'resistance' : Resistance distance.</p>
+</div>
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

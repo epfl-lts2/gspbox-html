@@ -1,0 +1,178 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_CHECK_CONNECTIVITY_UNDIRECTED - Check if the graph G is aperiodic strongly connected</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_check_connectivity_undirected.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p></p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_CHECK_CONNECTIVITY_UNDIRECTED - Check if the graph G is aperiodic strongly connected</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span>[ bool, in ] <span class="p">=</span><span class="w"> </span><span class="nf">gsp_check_connectivity_undirected</span><span class="p">(</span> G,param <span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_CHECK_CONNECTIVITY_UNDIRECTED Check if the graph G is aperiodic strongly connected</span>
+<span class="c">%   Usage: bool = gsp_check_connectivity_undirected( G );</span>
+<span class="c">%          bool = gsp_check_connectivity_undirected( L );</span>
+<span class="c">%          bool = gsp_check_connectivity_undirected( W );</span>
+<span class="c">%          [bool,in]=gsp_check_connectivity_undirected( ... );</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters:</span>
+<span class="c">%       G,W,L: Graph, Laplacian matrix or Weight martrix</span>
+<span class="c">%       param: Optional parameters</span>
+<span class="c">%</span>
+<span class="c">%   Output parameters</span>
+<span class="c">%       bool: Boolean</span>
+<span class="c">%       in  : Nodes without any in connections</span>
+<span class="c">%</span>
+<span class="c">%   Test if each node have at least one in connection and one out</span>
+<span class="c">%   connection. If this simple test give good results, the function compute</span>
+<span class="c">%   the perron vector of G and test it. It might take some time.</span>
+<span class="c">%</span>
+<span class="c">%   param is an optional structure that contains the following field</span>
+<span class="c">%</span>
+<span class="c">%    param.verbose*: display parameter - 0 no log - 1 display the errors</span>
+<span class="c">%   </span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/utils/gsp_check_connectivity_undirected.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+<span class="c">%TODO: Make this function better</span>
+
+<span class="c">% Date: 6 june 2013</span>
+<span class="c">% Author: Nathanael Perraudin</span>
+
+<span class="c">% Handle Input parameters</span>
+<span class="k">if</span> <span class="n">nargin</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span> <span class="n">error</span><span class="p">(</span><span class="s">&#39;Not enought inputs parameters!&#39;</span><span class="p">);</span> <span class="k">end</span>
+
+
+
+
+<span class="k">if</span> <span class="n">nargin</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span> <span class="n">param</span><span class="p">=</span><span class="n">struct</span><span class="p">;</span> <span class="k">end</span>
+    
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;verbose&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> <span class="k">end</span>
+
+
+<span class="k">if</span> <span class="n">isstruct</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="n">A</span><span class="p">=</span><span class="n">G</span><span class="p">.</span><span class="n">W</span><span class="p">;</span>
+<span class="k">else</span>
+    <span class="n">A</span><span class="p">=</span><span class="n">G</span><span class="p">;</span>
+<span class="k">end</span>
+
+
+<span class="c">% Remove the diagonal</span>
+<span class="n">A</span><span class="p">=</span><span class="n">A</span><span class="o">-</span><span class="nb">diag</span><span class="p">(</span><span class="nb">diag</span><span class="p">(</span><span class="n">A</span><span class="p">));</span>
+
+
+<span class="c">% Check the connecivity -- simple</span>
+<span class="n">bool</span><span class="p">=</span><span class="o">~</span><span class="n">boolean</span><span class="p">((</span><span class="n">sum</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">))</span><span class="o">+</span><span class="n">sum</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">))));</span>
+<span class="n">in</span><span class="p">=</span><span class="nb">find</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">));</span>
+<span class="k">try</span>   
+    <span class="k">if</span> <span class="n">bool</span>
+        <span class="n">d</span><span class="p">=</span><span class="n">bfs</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+        <span class="n">bool</span><span class="p">=</span><span class="o">~</span><span class="n">any</span><span class="p">(</span><span class="n">d</span><span class="o">==-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="k">end</span>
+<span class="k">catch</span>
+    <span class="n">warning</span><span class="p">(</span><span class="s">&#39;Using old slow method, install gaimc for speed gain&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bool</span>
+        <span class="n">D</span><span class="p">=</span><span class="nb">diag</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">.^</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">));</span>
+        <span class="n">A</span><span class="p">=</span><span class="n">D</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">D</span><span class="p">;</span> <span class="c">% eigenvalues of A between -1 and 1</span>
+        <span class="c">% We need to check the number of 1 eigenvalues</span>
+        <span class="n">max_eig_P</span> <span class="p">=</span> <span class="n">eigs</span><span class="p">(</span><span class="n">speye</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">A</span><span class="p">))</span><span class="o">+</span><span class="n">A</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_eig_P</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;</span><span class="mf">10e-12</span>
+            <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span>
+                <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;   ---   the second eigenvalue is 0   ---\n&#39;</span><span class="p">);</span>
+            <span class="k">end</span>
+            <span class="n">bool</span><span class="p">=</span><span class="mi">0</span><span class="p">;</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span>
+        <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;   ---   End of tests   ---\n&#39;</span><span class="p">);</span>   
+        <span class="k">if</span> <span class="n">bool</span>
+            <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;    The graph is connected.\n&#39;</span><span class="p">)</span>
+        <span class="k">else</span>
+            <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;    The graph is not connected.\n&#39;</span><span class="p">);</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">end</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

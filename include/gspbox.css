@@ -1,0 +1,66 @@
+@import url("/html4css1.css");
+
+body {
+  color: #000;
+  background: #FFF;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+div.sidebar {
+  margin:10px; 
+  font-size: small;
+  border:5px solid gray;
+  padding:10px;
+  width:10em;
+}
+
+div.navbar 
+{
+  margin-left: -5%;
+  margin-right: -5%;
+  color: #ffffff;
+  background: #929292;
+}
+
+div.footer {
+  margin-left: -5%;
+  margin-right: -5%;
+  background: #929292;
+}
+
+notes_title {
+  font-size: medium;
+}
+
+notes_author {
+  font-size: small;
+}
+
+notes_third {
+  font-size: small;
+}
+
+a:link
+{
+  color: black;
+  font-family: verdana;
+}
+
+a:visited
+{
+  color: black;
+  font-family: verdana;
+}
+
+a:hover
+{
+  color: black;
+  font-family: verdana;
+}
+
+a:active
+{
+  color: black;
+  font-family: verdana;
+}

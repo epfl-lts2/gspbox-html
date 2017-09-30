@@ -1,0 +1,267 @@
+ 
+<!DOCTYPE html PUBLIC "-//W3C//DTD html 4.0//EN">
+<html>
+<head>
+<title>GSP_PCL_NN_GRAPH - Create a nearest neighbors graph from a point cloud</title>
+<link rel="stylesheet" href="../include/mat2doc.css" type="text/css">
+<link rel="stylesheet" href="../include/color_text.css" type="text/css">
+<META NAME="keywords" CONTENT=""/> 
+
+<!-- Script to enable latex equations with MathJax -->
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+</head>
+
+<div id="container">
+<div id="header">
+<table style="height:100%; width:100%">
+<tr>
+<td valign="top" width="75%">
+<h1>The title of my toolbox</h1>
+
+<h2>Short description of my toolbox</h2>
+</td>
+<td valign="middle">
+<a href="./index.php"><img src="../include/logo_tr.png" alt="Logo" height="70"></a>
+</td>
+</tr>
+</table> 
+</div>
+<div id="space"></div>
+<div id="main_content">
+<table width="100%">
+<tr>
+<td valign="top" width="20%">
+<div id="menu">
+<div id="menutitle"><a href="gsp_pcl_nn_graph.html">View the help</a></div>
+
+<div id="menutitle">See also:</div>
+<ul>
+<li><a href="/Users/nati/work/publish/gsp/gspbox-html/pointsclouds/gsp_pointcloud.html">gsp_pointcloud</a></li>
+</ul>
+
+<div id="menutitle">Specific graphs</div>
+<ul>
+<li><a href="gsp_swiss_roll.html">gsp_swiss_roll</a></li>
+<li><a href="gsp_david_sensor_network.html">gsp_david_sensor_network</a></li>
+<li><a href="gsp_ring.html">gsp_ring</a></li>
+<li><a href="gsp_path.html">gsp_path</a></li>
+<li><a href="gsp_airfoil.html">gsp_airfoil</a></li>
+<li><a href="gsp_comet.html">gsp_comet</a></li>
+<li><a href="gsp_erdos_renyi.html">gsp_erdos_renyi</a></li>
+<li><a href="gsp_minnesota.html">gsp_minnesota</a></li>
+<li><a href="gsp_low_stretch_tree.html">gsp_low_stretch_tree</a></li>
+<li><a href="gsp_sensor.html">gsp_sensor</a></li>
+<li><a href="gsp_random_regular.html">gsp_random_regular</a></li>
+<li><a href="gsp_full_connected.html">gsp_full_connected</a></li>
+<li><a href="gsp_pcl_nn_graph.html">gsp_pcl_nn_graph</a></li>
+<li><a href="gsp_sphere.html">gsp_sphere</a></li>
+<li><a href="gsp_cube.html">gsp_cube</a></li>
+<li><a href="gsp_logo.html">gsp_logo</a></li>
+</ul>
+<div id="menutitle">Utils</div>
+<ul>
+<li><a href="gsp_graph_default_parameters.html">gsp_graph_default_parameters</a></li>
+<li><a href="gsp_graph.html">gsp_graph</a></li>
+</ul>
+
+
+</div>
+</td>
+<td valign="top"  width="80%">
+
+
+
+<div id="content">
+
+<h1 class="title">GSP_PCL_NN_GRAPH - Create a nearest neighbors graph from a point cloud</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span class="k">function</span><span class="w"> </span>[ G ] <span class="p">=</span><span class="w"> </span><span class="nf">gsp_pcl_nn_graph</span><span class="p">(</span> Xin, param <span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_PCL_NN_GRAPH Create a nearest neighbors graph from a point cloud</span>
+<span class="c">%   Usage :  G = gsp_pcl_nn_graph( Xin );</span>
+<span class="c">%            G = gsp_pcl_nn_graph( Xin, param );</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters:</span>
+<span class="c">%       Xin         : Input points</span>
+<span class="c">%       param       : Structure of optional parameters</span>
+<span class="c">%</span>
+<span class="c">%   Output parameters:</span>
+<span class="c">%       G           : Resulting graph</span>
+<span class="c">%</span>
+<span class="c">%   &#39;gsp_pcl_nn_graph( Xin, param )&#39; creates a graph from positional data. The points are </span>
+<span class="c">%   connected to their neighbors (either belonging to the k nearest </span>
+<span class="c">%   neighbors or to the epsilon-closest neighbors. </span>
+<span class="c">%</span>
+<span class="c">%   Example:</span>
+<span class="c">%</span>
+<span class="c">%           P = gsp_pointcloud(&#39;bunny&#39;);</span>
+<span class="c">%           param.type = &#39;knn&#39;;</span>
+<span class="c">%           G = gsp_pcl_nn_graph(P, param);</span>
+<span class="c">%           gsp_plot_graph(G);</span>
+<span class="c">%</span>
+<span class="c">%   Additional parameters</span>
+<span class="c">%   ---------------------</span>
+<span class="c">%</span>
+<span class="c">%    param.type      : [&#39;knn&#39;, &#39;radius&#39;]   the type of graph</span>
+<span class="c">%    param.center    : [0, 1]              center the data</span>
+<span class="c">%    param.rescale   : [0, 1]              rescale the data (in a 1-ball)</span>
+<span class="c">%    param.sigma     : float               the variance of the distance kernel</span>
+<span class="c">%    param.k         : int                 number of neighbors for knn</span>
+<span class="c">%    param.epsilon   : float               the radius for the range search</span>
+<span class="c">%</span>
+<span class="c">%   See also: gsp_pointcloud</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   Url: http://gspbox.sourceforge.net/doc/graphs/gsp_pcl_nn_graph.php</span>
+
+<span class="c">% Copyright (C) 2013-2014 Nathanael Perraudin, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.2.0</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% Author: Johan Paratte</span>
+<span class="c">% Date: 16 June 2014</span>
+<span class="c">% </span>
+
+    <span class="k">if</span> <span class="n">nargin</span> <span class="o">&lt;</span> <span class="mi">2</span>
+    <span class="c">% Define parameters</span>
+        <span class="n">param</span> <span class="p">=</span> <span class="p">{};</span>
+    <span class="k">end</span>
+    
+    <span class="c">%Parameters</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;type&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">type</span> <span class="p">=</span> <span class="s">&#39;knn&#39;</span><span class="p">;</span> <span class="k">end</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;center&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">center</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;rescale&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">rescale</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;k&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">k</span> <span class="p">=</span> <span class="mi">10</span><span class="p">;</span> <span class="k">end</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;sigma&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">sigma</span> <span class="p">=</span> <span class="mf">0.1</span><span class="p">;</span> <span class="k">end</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;epsilon&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">epsilon</span> <span class="p">=</span> <span class="mf">0.01</span><span class="p">;</span> <span class="k">end</span>
+
+    <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">d</span><span class="p">]</span> <span class="p">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">Xin</span><span class="p">);</span>
+    
+    
+    <span class="n">Xout</span> <span class="p">=</span> <span class="n">Xin</span><span class="p">;</span>
+    
+    <span class="c">%Center the point cloud</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">Xout</span> <span class="p">=</span> <span class="n">Xin</span> <span class="o">-</span> <span class="nb">repmat</span><span class="p">(</span><span class="n">mean</span><span class="p">(</span><span class="n">Xin</span><span class="p">),</span> <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">]);</span>
+    <span class="k">end</span>
+    
+    <span class="c">%Rescale the point cloud</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">rescale</span><span class="p">)</span>
+        <span class="n">bounding_radius</span> <span class="p">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">norm</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">Xout</span><span class="p">)</span> <span class="o">-</span> <span class="n">min</span><span class="p">(</span><span class="n">Xout</span><span class="p">));</span>
+        <span class="n">scale</span> <span class="p">=</span> <span class="nb">nthroot</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">min</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="o">/</span> <span class="mi">10</span><span class="p">;</span>
+        <span class="n">Xout</span> <span class="p">=</span> <span class="n">Xout</span> <span class="o">.*</span> <span class="p">(</span><span class="n">scale</span> <span class="o">/</span> <span class="n">bounding_radius</span><span class="p">);</span>
+    <span class="k">end</span>
+    
+    <span class="c">%Create KDTree for fast NN computation</span>
+    <span class="n">kdt</span> <span class="p">=</span> <span class="n">KDTreeSearcher</span><span class="p">(</span><span class="n">Xout</span><span class="p">,</span> <span class="s">&#39;distance&#39;</span><span class="p">,</span> <span class="s">&#39;euclidean&#39;</span><span class="p">);</span>
+    
+    <span class="k">switch</span> <span class="n">param</span><span class="p">.</span><span class="n">type</span>
+        <span class="c">%Connect the k NN</span>
+        <span class="k">case</span> <span class="s">&#39;knn&#39;</span>
+            <span class="n">k</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">k</span><span class="p">;</span>
+            <span class="n">spidx</span> <span class="p">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="n">k</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+            
+            <span class="c">%Find kNN for each point in X</span>
+            <span class="p">[</span><span class="n">NN</span><span class="p">,</span> <span class="n">D</span><span class="p">]</span> <span class="p">=</span> <span class="n">knnsearch</span><span class="p">(</span><span class="n">kdt</span><span class="p">,</span> <span class="n">Xout</span><span class="p">,</span> <span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+            
+            <span class="c">% Fill the 3-col values with [i, j, exp(-d(i,j)^2 / sigma)]</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="p">=</span> <span class="mi">1</span><span class="p">:</span><span class="n">N</span>
+                <span class="n">spidx</span><span class="p">((</span><span class="n">ii</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">ii</span><span class="o">*</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="p">=</span> <span class="nb">repmat</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+                <span class="n">spidx</span><span class="p">((</span><span class="n">ii</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">ii</span><span class="o">*</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="p">=</span> <span class="n">NN</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="k">end</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span>
+                <span class="n">spidx</span><span class="p">((</span><span class="n">ii</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">ii</span><span class="o">*</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="p">=</span> <span class="nb">exp</span><span class="p">(</span><span class="o">-</span><span class="n">D</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span><span class="mi">2</span><span class="p">:</span><span class="k">end</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="o">/</span><span class="n">param</span><span class="p">.</span><span class="n">sigma</span><span class="p">);</span>
+            <span class="k">end</span>
+            
+            <span class="c">%Actually create the sparse matrix from the 3-col values</span>
+            <span class="n">W</span> <span class="p">=</span> <span class="n">spconvert</span><span class="p">(</span><span class="n">spidx</span><span class="p">);</span>
+            
+        <span class="c">%Connect all the epsilon-closest NN</span>
+        <span class="k">case</span> <span class="s">&#39;radius&#39;</span>
+            <span class="nb">eps</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">epsilon</span><span class="p">;</span>
+            <span class="c">%Find all neighbors at distance &lt;= epsilon for each point in X</span>
+            <span class="p">[</span><span class="n">NN</span><span class="p">,</span> <span class="n">D</span><span class="p">]</span> <span class="p">=</span> <span class="n">rangesearch</span><span class="p">(</span><span class="n">kdt</span><span class="p">,</span> <span class="n">Xout</span><span class="p">,</span> <span class="nb">eps</span><span class="p">);</span>
+            
+            <span class="c">%Counting non-zero elements</span>
+            <span class="n">count</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="p">=</span> <span class="mi">1</span><span class="p">:</span><span class="n">N</span>
+               <span class="n">count</span> <span class="p">=</span> <span class="n">count</span> <span class="o">+</span> <span class="nb">length</span><span class="p">(</span><span class="n">NN</span><span class="p">{</span><span class="n">ii</span><span class="p">})</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> 
+            <span class="k">end</span>
+            <span class="n">spidx</span> <span class="p">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+            <span class="n">start</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+            
+            <span class="c">% Fill the 3-col values with [i, j, exp(-d(i,j)^2 / sigma)]</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="p">=</span> <span class="mi">1</span><span class="p">:</span><span class="n">N</span>
+                <span class="n">len</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">NN</span><span class="p">{</span><span class="n">ii</span><span class="p">})</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+                <span class="n">spidx</span><span class="p">(</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">len</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="p">=</span> <span class="nb">repmat</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+                <span class="n">spidx</span><span class="p">(</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">len</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="p">=</span> <span class="n">NN</span><span class="p">{</span><span class="n">ii</span><span class="p">}(</span><span class="mi">2</span><span class="p">:</span><span class="k">end</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span>
+                <span class="n">spidx</span><span class="p">(</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">len</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="p">=</span> <span class="nb">exp</span><span class="p">(</span><span class="o">-</span><span class="n">D</span><span class="p">{</span><span class="n">ii</span><span class="p">}(</span><span class="mi">2</span><span class="p">:</span><span class="k">end</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="o">/</span><span class="n">param</span><span class="p">.</span><span class="n">sigma</span><span class="p">);</span>
+                <span class="n">start</span> <span class="p">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">len</span><span class="p">;</span>
+            <span class="k">end</span>
+            
+            <span class="c">%Actually create the sparse matrix from the 3-col values</span>
+            <span class="n">W</span> <span class="p">=</span> <span class="n">spconvert</span><span class="p">(</span><span class="n">spidx</span><span class="p">);</span>
+            
+        <span class="k">otherwise</span>
+            <span class="n">error</span><span class="p">(</span><span class="s">&#39;Unknown type : allowed values are knn, radius&#39;</span><span class="p">);</span>
+    <span class="k">end</span>
+    
+    <span class="c">% Computes the average degree when using the epsilon-based neighborhood</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">type</span><span class="p">,</span><span class="s">&#39;radius&#39;</span><span class="p">))</span>
+        <span class="n">text</span> <span class="p">=</span> <span class="n">sprintf</span><span class="p">(</span><span class="s">&#39;Average degree = %d&#39;</span><span class="p">,</span> <span class="n">nnz</span><span class="p">(</span><span class="n">W</span><span class="p">)</span><span class="o">/</span><span class="nb">size</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="mi">1</span><span class="p">));</span>
+        <span class="nb">disp</span><span class="p">(</span><span class="n">text</span><span class="p">);</span>
+    <span class="k">end</span>
+
+    <span class="c">% Symmetry checks</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="n">W</span><span class="o">&#39;</span><span class="p">,</span> <span class="s">&#39;fro&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="nb">disp</span><span class="p">(</span><span class="s">&#39;The matrix W is symmetric&#39;</span><span class="p">);</span>
+    <span class="k">else</span>
+        <span class="nb">disp</span><span class="p">([</span><span class="s">&#39;WARNING : The matrix W is not symmetric !&#39;</span><span class="p">,</span><span class="c">...</span>
+              <span class="s">&#39; Artificial symmetrization&#39;</span><span class="p">]);</span>
+        <span class="n">W</span> <span class="p">=</span> <span class="p">(</span><span class="n">W</span><span class="o">+</span><span class="n">W</span><span class="o">&#39;</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+    <span class="k">end</span>
+    
+    <span class="c">%Fill in the graph structure</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">N</span> <span class="p">=</span> <span class="n">N</span><span class="p">;</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">W</span> <span class="p">=</span> <span class="n">W</span><span class="p">;</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">coords</span> <span class="p">=</span> <span class="n">Xout</span><span class="p">;</span>
+    <span class="c">%G.limits=[-1e-4,1.01*max(x),-1e-4,1.01*max(y)];</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">type</span> <span class="p">=</span> <span class="s">&#39;nearest neighbors&#39;</span><span class="p">;</span>
+    <span class="c">%G.vertex_size=30;</span>
+
+    <span class="n">G</span> <span class="p">=</span> <span class="n">gsp_graph_default_parameters</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+<span class="k">end</span>
+</pre></div>
+
+
+
+</div>
+
+
+</td>
+</tr>
+</table>
+</div>
+<div id="space"></div>
+<div id="footer">
+Designed by: Nathanael Perraudin, David Shuman, Johan Paratte
+</div>
+</div>
+
+</body>
+</html>
+
+
+

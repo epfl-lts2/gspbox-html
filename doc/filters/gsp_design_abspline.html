@@ -1,0 +1,143 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_DESIGN_ABSPLINE - Design the abspline filter bank</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_design_abspline_code.html">View the code</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p></p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_DESIGN_ABSPLINE - Design the abspline filter bank</h1>
+
+<div class="section" id="usage">
+<h2>Usage</h2>
+<pre class="literal-block">
+g =  gsp_design_abspline(G, Nf, param);
+gsp_design_abspline(G ,Nf);
+gsp_design_abspline(G);
+</pre>
+</div>
+<div class="section" id="input-parameters">
+<h2>Input parameters</h2>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option"><var>G</var></span></kbd></td>
+<td>Graph or upper bound on the Laplacian spectrum</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option"><var>Nf</var></span></kbd></td>
+<td>Number of filters to cover the interval [0,lmax] (default 6)</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option"><var>param</var></span></kbd></td>
+<td>Structure of optional parameters</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="output-parameters">
+<h2>Output parameters</h2>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option"><var>g</var></span></kbd></td>
+<td>A cell array of filters</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="xxxdescription">
+<h2>Description</h2>
+<p>This function return a array of filters designed to be AB spline
+wavelet. The AB spline wavelet is .....</p>
+<!-- g_h(f) = -->
+<!-- math: g_h(f) = -->
+<p>In our convention the eigenvalues of Laplacian are equivalent to the
+square of vertex frequencies: <span class="math">\(f = \lambda^2\)</span>.</p>
+<p>The low pass filter is given by</p>
+<!-- g_l(f) =   exp(-f^8) -->
+<!-- math: g_l(f) =  exp(-f^8) -->
+<p><em>param</em> is an optional structure containing the following fields</p>
+<ul class="simple">
+<li><em>param.t</em>: vector of scale to be used (default: log scale)</li>
+<li><em>param.lpfactor</em>: <em>lmin*=*lmax</em>/<em>lpfactor</em> will be used to determine
+scales, then scaling function kernel will be created to fill the
+lowpass gap. (default 20)</li>
+<li><em>param.verbose</em>: verbosity level. 0 no log - 1 display warnings.
+(default 1)</li>
+<li><em>param.normalize</em>: normalize the wavelet by the factor <span class="math">\(\sqrt{t}\)</span>
+(default 0.)</li>
+</ul>
+<p>This function will compute the maximum eigenvalue of the laplacian. To
+be more efficient, you can precompute it using:</p>
+<pre class="literal-block">
+G = gsp_estimate_lmax(G);
+</pre>
+<p>Example:</p>
+<pre class="literal-block">
+Nf = 4;
+G = gsp_sensor(100);
+G = gsp_estimate_lmax(G);
+g = gsp_design_abspline(G, Nf);
+gsp_plot_filter(G,g);
+</pre>
+<img alt="gsp_design_abspline_1_1.png" class="align-center" src="gsp_design_abspline_1_1.png" />
+<p>This function is inspired by the sgwt_toolbox.</p>
+</div>
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

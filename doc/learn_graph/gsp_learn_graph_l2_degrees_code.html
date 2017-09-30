@@ -1,0 +1,349 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_LEARN_GRAPH_L2_DEGREES - Learn graph from pairwise distances using l2 prior on nodes degrees</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_learn_graph_l2_degrees.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p><div id="menutitle">See also:</div>
+<ul>
+<li><a href="#BASEURL#/doc/learn_graph/gsp_learn_graph_log_degrees.html">gsp_learn_graph_log_degrees</a></li>
+<li><a href="#BASEURL#/doc/utils/gsp_distanz.html">gsp_distanz</a></li>
+<li><a href="#BASEURL#/doc/graphs/gsp_update_weights.html">gsp_update_weights</a></li>
+</ul>
+</p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_LEARN_GRAPH_L2_DEGREES - Learn graph from pairwise distances using l2 prior on nodes degrees</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span>[W, stat] <span class="p">=</span><span class="w"> </span><span class="nf">gsp_learn_graph_l2_degrees</span><span class="p">(</span>Z, a, params<span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_LEARN_GRAPH_L2_DEGREES Learn graph from pairwise distances using l2 prior on nodes degrees</span>
+<span class="c">%   Usage:  [W, stat] = gsp_learn_graph_l2_degrees(Z, a)</span>
+<span class="c">%           [W, stat] = gsp_learn_graph_l2_degrees(Z, a, params)</span>
+<span class="c">%</span>
+<span class="c">%   Inputs:</span>
+<span class="c">%         Z         : Matrix with (squared) pairwise distances of nodes</span>
+<span class="c">%         a         : L||_F^2 prior constant   (bigger a -&gt; more dense W)</span>
+<span class="c">%         params    : Optional parameters</span>
+<span class="c">%</span>
+<span class="c">%   Outputs:</span>
+<span class="c">%         W         : Weighted adjacency matrix</span>
+<span class="c">%         stat      : Optional output statistics (adds small overhead)</span>
+<span class="c">%</span>
+<span class="c">%   &#39;W = gsp_learn_graph_l2_degrees(Z, a, params)&#39; computes a weighted</span>
+<span class="c">%   adjacency matrix W from squared pairwise distances in Z, using the</span>
+<span class="c">%   smoothness assumption that text{trace}(X^TLX) is small, where X is</span>
+<span class="c">%   the data (columns) changing smoothly from node to node on the graph and</span>
+<span class="c">%   L = D-W is the combinatorial graph Laplacian.</span>
+<span class="c">%</span>
+<span class="c">%   Alternatively, Z can contain other types of distances and use the</span>
+<span class="c">%   smoothness assumption that</span>
+<span class="c">%</span>
+<span class="c">%      sum(sum(W .* Z))</span>
+<span class="c">%</span>
+<span class="c">%   is small. </span>
+<span class="c">%</span>
+<span class="c">%   The minimization problem solved is </span>
+<span class="c">%</span>
+<span class="c">%      minimize_W sum(sum(W .* Z)) + a/2 * ||W||_F^2/2 </span>
+<span class="c">%                 + a/2 * ||sum(W)||_2^2 </span>
+<span class="c">%                 s.t. sum(sum(W)) == n</span>
+<span class="c">%</span>
+<span class="c">%   subject to W being a valid weighted adjacency matrix (non-negative,</span>
+<span class="c">%   symmetric, with zero diagonal). Note that </span>
+<span class="c">%</span>
+<span class="c">%      .||W||_F^2/2 + ||sum(W)||_2^2  = ||L||^2</span>
+<span class="c">%</span>
+<span class="c">%   The algorithm used is forward-backward-forward (FBF) based primal dual</span>
+<span class="c">%   optimization (see references).</span>
+<span class="c">%</span>
+<span class="c">%   Example:</span>
+<span class="c">%</span>
+<span class="c">%         G = gsp_sensor(256);</span>
+<span class="c">%         f1 = @(x,y) sin((2-x-y).^2);</span>
+<span class="c">%         f2 = @(x,y) cos((x+y).^2);</span>
+<span class="c">%         f3 = @(x,y) (x-.5).^2 + (y-.5).^3 + x - y;</span>
+<span class="c">%         f4 = @(x,y) sin(3*((x-.5).^2+(y-.5).^2));</span>
+<span class="c">%         X = [f1(G.coords(:,1), G.coords(:,2)), f2(G.coords(:,1), G.coords(:,2)), f3(G.coords(:,1), G.coords(:,2)), f4(G.coords(:,1), G.coords(:,2))];</span>
+<span class="c">%         figure; subplot(2,2,1); gsp_plot_signal(G, X(:,1)); title(&#39;1st smooth signal&#39;);</span>
+<span class="c">%         subplot(2,2,2); gsp_plot_signal(G, X(:,2)); title(&#39;2nd smooth signal&#39;);</span>
+<span class="c">%         subplot(2,2,3); gsp_plot_signal(G, X(:,3)); title(&#39;3rd smooth signal&#39;);</span>
+<span class="c">%         subplot(2,2,4); gsp_plot_signal(G, X(:,4)); title(&#39;4th smooth signal&#39;);</span>
+<span class="c">%         Z = gsp_distanz(X&#39;).^2;</span>
+<span class="c">%         [W] = gsp_learn_graph_l2_degrees(Z*25, 1);</span>
+<span class="c">%         W(W&lt;1e-5) = 0;</span>
+<span class="c">%         G2 = gsp_update_weights(G, W);</span>
+<span class="c">%         figure; gsp_plot_graph(G2); title(&#39;Graph with edges learned from above 4 signals&#39;);</span>
+<span class="c">%       </span>
+<span class="c">%</span>
+<span class="c">%   Additional parameters</span>
+<span class="c">%   ---------------------</span>
+<span class="c">%  </span>
+<span class="c">%    params.W_init   : Initialization point. default: zeros(size(Z))</span>
+<span class="c">%    verbosity       : Above 1 adds a small overhead. Default: 1</span>
+<span class="c">%    maxit           : Maximum number of iterations. Default: 1000</span>
+<span class="c">%    tol             : Tolerance for stopping criterion. Default: 1e-5</span>
+<span class="c">%    step_size       : Step size from the interval (0,1). Default: 0.5</span>
+<span class="c">%</span>
+<span class="c">%   The stopping criterion is whether both relative primal and dual</span>
+<span class="c">%   distance between two iterations are below a given tolerance. </span>
+<span class="c">%   </span>
+<span class="c">%   To set the step size use the following rule of thumb: Set it so that</span>
+<span class="c">%   relative change of primal and dual converge with similar rates (use</span>
+<span class="c">%   verbosity &gt; 1).</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   See also: gsp_learn_graph_log_degrees gsp_distanz gsp_update_weights</span>
+<span class="c">% </span>
+<span class="c">%   References:</span>
+<span class="c">%     V. Kalofolias. How to learn a graph from smooth signals. Technical</span>
+<span class="c">%     report, AISTATS 2016: proceedings at Journal of Machine Learning</span>
+<span class="c">%     Research (JMLR)., 2016.</span>
+<span class="c">%     </span>
+<span class="c">%     N. Komodakis and J.-C. Pesquet. Playing with duality: An overview of</span>
+<span class="c">%     recent primal? dual approaches for solving large-scale optimization</span>
+<span class="c">%     problems. Signal Processing Magazine, IEEE, 32(6):31--54, 2015.</span>
+<span class="c">%     </span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/learn_graph/gsp_learn_graph_l2_degrees.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+<span class="c">% Author: Vassilis Kalofolias</span>
+<span class="c">% Testing: gsp_test_learn_graph</span>
+<span class="c">% Date: June 2015</span>
+
+
+<span class="c">%% Default parameters</span>
+<span class="k">if</span> <span class="n">nargin</span> <span class="o">&lt;</span> <span class="mi">3</span>
+    <span class="n">params</span> <span class="p">=</span> <span class="n">struct</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;verbosity&#39;</span><span class="p">)),</span>   <span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>   <span class="k">end</span>
+<span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;maxit&#39;</span><span class="p">)),</span>       <span class="n">params</span><span class="p">.</span><span class="n">maxit</span> <span class="p">=</span> <span class="mi">1000</span><span class="p">;</span>      <span class="k">end</span>
+<span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;tol&#39;</span><span class="p">)),</span>         <span class="n">params</span><span class="p">.</span><span class="n">tol</span> <span class="p">=</span> <span class="mf">1e-5</span><span class="p">;</span>      <span class="k">end</span>
+<span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;step_size&#39;</span><span class="p">)),</span>   <span class="n">params</span><span class="p">.</span><span class="n">step_size</span> <span class="p">=</span> <span class="p">.</span><span class="mi">5</span><span class="p">;</span>      <span class="k">end</span>     <span class="c">% from (0, 1)</span>
+
+
+<span class="c">%% Fix parameter size and initialize</span>
+<span class="n">z</span> <span class="p">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">Z</span><span class="p">);</span>
+<span class="n">z</span> <span class="p">=</span> <span class="n">full</span><span class="p">(</span><span class="n">z</span><span class="p">(:));</span>
+<span class="n">l</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">z</span><span class="p">);</span>                   <span class="c">% number of edges</span>
+<span class="c">% n(n-1)/2 = l =&gt; n = (1 + sqrt(1+8*l))/ 2</span>
+<span class="n">n</span> <span class="p">=</span> <span class="nb">round</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="nb">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">8</span><span class="o">*</span><span class="n">l</span><span class="p">))</span><span class="o">/</span> <span class="mi">2</span><span class="p">);</span>    <span class="c">% number of nodes</span>
+
+<span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;W_init&#39;</span><span class="p">)</span>
+    <span class="n">w</span> <span class="p">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">W_init</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span>
+<span class="k">else</span>
+    <span class="c">% w_0 = exp(-6*dx2/mean(dx2));</span>
+    <span class="n">w</span> <span class="p">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">z</span><span class="p">));</span>
+<span class="k">end</span>
+
+<span class="c">%% Needed operators</span>
+
+<span class="c">% needed for gradient of h(w)</span>
+<span class="c">% L*w = sum(W)</span>
+<span class="p">[</span><span class="n">S</span><span class="p">,</span> <span class="n">St</span><span class="p">]</span> <span class="p">=</span> <span class="n">sum_squareform</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+
+<span class="c">% ones_l = ones(l,1);</span>
+
+<span class="n">sum_op</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="n">S</span><span class="o">*</span><span class="n">w</span><span class="p">;</span>
+<span class="n">sum_t_op</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">)</span> <span class="n">St</span><span class="o">*</span><span class="n">z</span><span class="p">;</span>
+<span class="c">% edges -&gt; scalar</span>
+<span class="n">K_op</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="mi">2</span><span class="o">*</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>   <span class="c">% sum(sum(W)) = 2 * sum(w)</span>
+<span class="c">% scalar -&gt; edges</span>
+<span class="c">% Kt_op = @(z) 2 * z * ones_l;</span>
+<span class="n">norm_K</span> <span class="p">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">l</span><span class="p">);</span>
+<span class="c">%norm_L = l;         % do i need the square norm or the square root?</span>
+
+<span class="c">%% TODO: Rescaling??</span>
+
+<span class="c">%% Learn the graph</span>
+<span class="c">% min_{W&gt;=0}     tr(X&#39;*L*X) - gc * sum(log(sum(W))) + gp * norm(W-W0,&#39;fro&#39;)^2, where L = diag(sum(W))-W</span>
+<span class="c">% min_W       I{W&gt;=0} + W(:)&#39;*Dx(:)  - gc * sum(log(sum(W))) + gp * norm(W-W0,&#39;fro&#39;)^2</span>
+<span class="c">% min_W                f(W)          +       g(L_op(W))      +   h(W)</span>
+
+<span class="c">% put proximal of trace plus positivity together</span>
+<span class="n">f</span><span class="p">.</span><span class="n">eval</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="mi">2</span><span class="o">*</span><span class="n">w</span><span class="o">&#39;*</span><span class="n">z</span><span class="p">;</span>    <span class="c">% half should be counted</span>
+<span class="c">%f.eval = @(W) 0;</span>
+<span class="n">f</span><span class="p">.</span><span class="n">prox</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">w</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">z</span><span class="p">);</span>  <span class="c">% all change the same</span>
+
+<span class="c">% projection of sum of W on n</span>
+<span class="c">% g(w) = IND(sum(w) == n)</span>
+<span class="n">g</span><span class="p">.</span><span class="n">eval</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">)</span> <span class="mi">10</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="o">-</span><span class="n">n</span><span class="p">);</span>  <span class="c">% this could be 0. Measures violation of the condition sum(w) = n!!</span>
+<span class="n">g</span><span class="p">.</span><span class="n">prox</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="n">n</span><span class="p">;</span>
+<span class="c">% proximal of conjugate of g: z - c*g.prox(z/c, 1/c)</span>
+<span class="n">g_star_prox</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="n">z</span> <span class="o">-</span> <span class="n">c</span><span class="o">*</span><span class="n">n</span><span class="p">;</span>
+
+<span class="c">% the following is the squared frobenius norm of the graph Laplacian</span>
+<span class="n">h</span><span class="p">.</span><span class="n">eval</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">norm</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>^<span class="mi">2</span> <span class="o">+</span> <span class="n">norm</span><span class="p">(</span><span class="n">sum_op</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>^<span class="mi">2</span><span class="p">);</span>   <span class="c">% CAREFUL: w two times!</span>
+<span class="n">h</span><span class="p">.</span><span class="n">grad</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="n">sum_t_op</span><span class="p">(</span><span class="n">sum_op</span><span class="p">(</span><span class="n">w</span><span class="p">)));</span>
+<span class="c">% if the next is wrong we don&#39;t converge for time_step != 0.5</span>
+<span class="n">h</span><span class="p">.</span><span class="nb">beta</span> <span class="p">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">));</span>    <span class="c">% = norm(ones(n)+eye(n)) = n+1</span>
+
+<span class="c">% TODO: best convergence when h.beta = 1 ?? then use rescaling!!</span>
+
+<span class="c">% if there is no quadratic term, it reduces to a linear program:</span>
+<span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="c">%   X =     linprog(f,   A,   b,   Aeq,           beq,LB,UB,X0)</span>
+    <span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">fval</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">exitflag</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">output</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">lambda</span><span class="p">]</span> <span class="p">=</span> <span class="n">linprog</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="nb">ones</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">z</span><span class="p">))</span><span class="o">&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="nb">zeros</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">z</span><span class="p">)));</span>
+<span class="k">else</span>
+    <span class="c">%% My custom FBF based primal dual (see [Komodakis, Pesquet])</span>
+    <span class="c">% parameters mu, epsilon for convergence (see [1])</span>
+    <span class="n">mu</span> <span class="p">=</span> <span class="n">h</span><span class="p">.</span><span class="nb">beta</span> <span class="o">+</span> <span class="n">norm_K</span><span class="p">;</span>     <span class="c">%TODO: is it squared or not??</span>
+    <span class="n">epsilon</span> <span class="p">=</span> <span class="n">lin_map</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">mu</span><span class="p">)],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]);</span>   <span class="c">% in (0, 1/(1+mu) )</span>
+    
+    <span class="c">% INITIALIZATION</span>
+    <span class="c">% primal variable ALREADY INITIALIZED</span>
+    <span class="c">%w = params.w_init;</span>
+    <span class="c">% dual variable</span>
+    <span class="n">v_n</span> <span class="p">=</span> <span class="n">K_op</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>
+    <span class="k">if</span> <span class="n">nargout</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="n">stat</span><span class="p">.</span><span class="n">f_eval</span> <span class="p">=</span> <span class="nb">nan</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">maxit</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">stat</span><span class="p">.</span><span class="n">g_eval</span> <span class="p">=</span> <span class="nb">nan</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">maxit</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">stat</span><span class="p">.</span><span class="n">h_eval</span> <span class="p">=</span> <span class="nb">nan</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">maxit</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">stat</span><span class="p">.</span><span class="n">fgh_eval</span> <span class="p">=</span> <span class="nb">nan</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">maxit</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">stat</span><span class="p">.</span><span class="n">pos_violation</span> <span class="p">=</span> <span class="nb">nan</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">maxit</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">end</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Relative change of primal, dual variables, and objective fun\n&#39;</span><span class="p">);</span>
+    <span class="k">end</span>
+    <span class="n">tic</span>
+    <span class="n">gn</span> <span class="p">=</span> <span class="n">lin_map</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">step_size</span><span class="p">,</span> <span class="p">[</span><span class="n">epsilon</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">epsilon</span><span class="p">)</span><span class="o">/</span><span class="n">mu</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]);</span>              <span class="c">% in [epsilon, (1-epsilon)/mu]</span>
+    <span class="k">for</span> <span class="nb">i</span> <span class="p">=</span> <span class="mi">1</span><span class="p">:</span><span class="n">params</span><span class="p">.</span><span class="n">maxit</span>
+        <span class="c">%Y_n = w - gn * (h.grad(w) + Kt_op(v_n));</span>
+        <span class="n">Y_n</span> <span class="p">=</span> <span class="n">w</span> <span class="o">-</span> <span class="n">gn</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span><span class="p">.</span><span class="n">grad</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">v_n</span><span class="p">);</span>
+        <span class="n">y_n</span> <span class="p">=</span> <span class="n">v_n</span> <span class="o">+</span> <span class="n">gn</span> <span class="o">*</span> <span class="p">(</span><span class="n">K_op</span><span class="p">(</span><span class="n">w</span><span class="p">));</span>
+        <span class="n">P_n</span> <span class="p">=</span> <span class="n">f</span><span class="p">.</span><span class="n">prox</span><span class="p">(</span><span class="n">Y_n</span><span class="p">,</span> <span class="n">gn</span><span class="p">);</span>
+        <span class="n">p_n</span> <span class="p">=</span> <span class="n">g_star_prox</span><span class="p">(</span><span class="n">y_n</span><span class="p">,</span> <span class="n">gn</span><span class="p">);</span> <span class="c">% = y_n - gn*g_prox(y_n/gn, 1/gn)</span>
+        <span class="c">%Q_n = P_n - gn * (h.grad(P_n) + Kt_op(p_n));</span>
+        <span class="n">Q_n</span> <span class="p">=</span> <span class="n">P_n</span> <span class="o">-</span> <span class="n">gn</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span><span class="p">.</span><span class="n">grad</span><span class="p">(</span><span class="n">P_n</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">p_n</span><span class="p">);</span>
+        <span class="n">q_n</span> <span class="p">=</span> <span class="n">p_n</span> <span class="o">+</span> <span class="n">gn</span> <span class="o">*</span> <span class="p">(</span><span class="n">K_op</span><span class="p">(</span><span class="n">P_n</span><span class="p">));</span>
+        
+        <span class="k">if</span> <span class="n">nargout</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">2</span>
+            <span class="n">stat</span><span class="p">.</span><span class="n">f_eval</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="p">=</span> <span class="n">f</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>
+            <span class="n">stat</span><span class="p">.</span><span class="n">g_eval</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="p">=</span> <span class="n">g</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">K_op</span><span class="p">(</span><span class="n">w</span><span class="p">));</span>
+            <span class="n">stat</span><span class="p">.</span><span class="n">h_eval</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="p">=</span> <span class="n">h</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>
+            <span class="n">stat</span><span class="p">.</span><span class="n">fgh_eval</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="p">=</span> <span class="n">stat</span><span class="p">.</span><span class="n">f_eval</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">stat</span><span class="p">.</span><span class="n">g_eval</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">stat</span><span class="p">.</span><span class="n">h_eval</span><span class="p">(</span><span class="nb">i</span><span class="p">);</span>
+            <span class="n">stat</span><span class="p">.</span><span class="n">pos_violation</span><span class="p">(</span><span class="nb">i</span><span class="p">)</span> <span class="p">=</span> <span class="o">-</span><span class="n">sum</span><span class="p">(</span><span class="n">min</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">w</span><span class="p">));</span>
+        <span class="k">end</span>
+        <span class="n">rel_norm_primal</span> <span class="p">=</span> <span class="n">norm</span><span class="p">(</span><span class="o">-</span> <span class="n">Y_n</span> <span class="o">+</span> <span class="n">Q_n</span><span class="p">,</span> <span class="s">&#39;fro&#39;</span><span class="p">)</span><span class="o">/</span><span class="n">norm</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="s">&#39;fro&#39;</span><span class="p">);</span>
+        <span class="n">rel_norm_dual</span> <span class="p">=</span> <span class="n">norm</span><span class="p">(</span><span class="o">-</span> <span class="n">y_n</span> <span class="o">+</span> <span class="n">q_n</span><span class="p">)</span><span class="o">/</span><span class="n">norm</span><span class="p">(</span><span class="n">v_n</span><span class="p">);</span>
+        
+        <span class="k">if</span> <span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">2</span>
+            <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;iter %4d: %6.4e   %6.4e   %6.4e    %6.4e   %6.3e \n&#39;</span><span class="p">,</span> <span class="nb">i</span><span class="p">,</span> <span class="n">rel_norm_primal</span><span class="p">,</span> <span class="n">rel_norm_dual</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">fgh_eval</span><span class="p">(</span><span class="nb">i</span><span class="p">),</span> <span class="n">full</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">),</span> <span class="n">stat</span><span class="p">.</span><span class="n">h_eval</span><span class="p">(</span><span class="nb">i</span><span class="p">));</span>
+        <span class="k">elseif</span> <span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span>
+            <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;iter %4d: %6.4e   %6.4e\n&#39;</span><span class="p">,</span> <span class="nb">i</span><span class="p">,</span> <span class="n">rel_norm_primal</span><span class="p">,</span> <span class="n">rel_norm_dual</span><span class="p">);</span>
+        <span class="k">end</span>
+        
+        <span class="k">if</span> <span class="nb">i</span> <span class="o">&lt;</span><span class="p">=</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;W_init&#39;</span><span class="p">)</span> 
+            <span class="n">w</span> <span class="p">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">W_init</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span>
+        <span class="k">else</span>
+            <span class="n">w</span> <span class="p">=</span> <span class="n">w</span> <span class="o">-</span> <span class="n">Y_n</span> <span class="o">+</span> <span class="n">Q_n</span><span class="p">;</span>
+        <span class="k">end</span>
+        <span class="n">v_n</span> <span class="p">=</span> <span class="n">v_n</span> <span class="o">-</span> <span class="n">y_n</span> <span class="o">+</span> <span class="n">q_n</span><span class="p">;</span>
+        
+        <span class="k">if</span> <span class="n">rel_norm_primal</span> <span class="o">&lt;</span> <span class="n">params</span><span class="p">.</span><span class="n">tol</span> <span class="o">&amp;&amp;</span> <span class="n">rel_norm_dual</span> <span class="o">&lt;</span> <span class="n">params</span><span class="p">.</span><span class="n">tol</span>
+            <span class="k">break</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+    <span class="n">stat</span><span class="p">.</span><span class="n">time</span> <span class="p">=</span> <span class="n">toc</span><span class="p">;</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;# iters: %4d. Rel primal: %6.4e Rel dual: %6.4e   %6.3e\n&#39;</span><span class="p">,</span> <span class="nb">i</span><span class="p">,</span> <span class="n">rel_norm_primal</span><span class="p">,</span> <span class="n">rel_norm_dual</span><span class="p">,</span> <span class="n">f</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">K_op</span><span class="p">(</span><span class="n">w</span><span class="p">))</span> <span class="o">+</span> <span class="n">h</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">w</span><span class="p">));</span>
+        <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Time needed is %f seconds\n&#39;</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">time</span><span class="p">);</span>
+    <span class="k">end</span>
+    
+    <span class="c">% Use the following for testing:</span>
+    <span class="c">%     g.L = K_op;</span>
+    <span class="c">%     g.Lt = Kt_op;</span>
+    <span class="c">%     g.norm_L = norm_K;</span>
+    <span class="c">%     [w, info] = fbf_primal_dual(w, f, g, h, params);</span>
+    <span class="c">%[w, info] = fb_based_primal_dual(w, f, g, h, params);</span>
+    <span class="c">%%</span>
+    
+    <span class="k">if</span> <span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">3</span>
+        <span class="n">figure</span><span class="p">;</span> <span class="n">plot</span><span class="p">(</span><span class="nb">real</span><span class="p">([</span><span class="n">stat</span><span class="p">.</span><span class="n">f_eval</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">g_eval</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">h_eval</span><span class="p">]));</span> <span class="n">hold</span> <span class="n">all</span><span class="p">;</span> <span class="n">plot</span><span class="p">(</span><span class="nb">real</span><span class="p">(</span><span class="n">stat</span><span class="p">.</span><span class="n">fgh_eval</span><span class="p">),</span> <span class="s">&#39;.&#39;</span><span class="p">);</span> <span class="n">legend</span><span class="p">(</span><span class="s">&#39;f = w&#39;&#39;*dx2&#39;</span><span class="p">,</span> <span class="s">&#39;g = 1000 * abs(2sum(w)-n)&#39;</span><span class="p">,</span> <span class="s">&#39;h = a*norm(L)^2&#39;</span><span class="p">,</span> <span class="s">&#39;f+g+h&#39;</span><span class="p">);</span>
+        <span class="n">figure</span><span class="p">;</span> <span class="n">plot</span><span class="p">(</span><span class="n">stat</span><span class="p">.</span><span class="n">pos_violation</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;sum of negative (invalid) values per iteration&#39;</span><span class="p">)</span>
+        <span class="n">figure</span><span class="p">;</span> <span class="n">semilogy</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="n">diff</span><span class="p">(</span><span class="nb">real</span><span class="p">(</span><span class="n">stat</span><span class="p">.</span><span class="n">fgh_eval</span><span class="o">&#39;</span><span class="p">))),</span><span class="s">&#39;b.-&#39;</span><span class="p">);</span> <span class="n">hold</span> <span class="n">on</span><span class="p">;</span> <span class="n">semilogy</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">diff</span><span class="p">(</span><span class="nb">real</span><span class="p">(</span><span class="n">stat</span><span class="p">.</span><span class="n">fgh_eval</span><span class="o">&#39;</span><span class="p">))),</span><span class="s">&#39;ro-&#39;</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;|f(i)-f(i-1)|&#39;</span><span class="p">);</span> <span class="n">legend</span><span class="p">(</span><span class="s">&#39;going down&#39;</span><span class="p">,</span><span class="s">&#39;going up&#39;</span><span class="p">);</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">W</span> <span class="p">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

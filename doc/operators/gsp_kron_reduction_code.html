@@ -1,0 +1,224 @@
+ 
+<!DOCTYPE html PUBLIC "-//W3C//DTD html 4.0//EN">
+<html>
+<head>
+<title>GSP_KRON_REDUCTION - Compute the kron reduction</title>
+<link rel="stylesheet" href="../include/mat2doc.css" type="text/css">
+<link rel="stylesheet" href="../include/color_text.css" type="text/css">
+<META NAME="keywords" CONTENT=""/> 
+
+<!-- Script to enable latex equations with MathJax -->
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+</head>
+
+<div id="container">
+<div id="header">
+<table style="height:100%; width:100%">
+<tr>
+<td valign="top" width="75%">
+<h1>The title of my toolbox</h1>
+
+<h2>Short description of my toolbox</h2>
+</td>
+<td valign="middle">
+<a href="./index.php"><img src="../include/logo_tr.png" alt="Logo" height="70"></a>
+</td>
+</tr>
+</table> 
+</div>
+<div id="space"></div>
+<div id="main_content">
+<table width="100%">
+<tr>
+<td valign="top" width="20%">
+<div id="menu">
+<div id="menutitle"><a href="gsp_kron_reduction.html">View the help</a></div>
+
+
+<div id="menutitle">Localisation</div>
+<ul>
+<li><a href="gsp_translate.html">gsp_translate</a></li>
+<li><a href="gsp_modulate.html">gsp_modulate</a></li>
+<li><a href="gsp_localize.html">gsp_localize</a></li>
+</ul>
+<div id="menutitle">Differential</div>
+<ul>
+<li><a href="gsp_grad_mat.html">gsp_grad_mat</a></li>
+<li><a href="gsp_grad.html">gsp_grad</a></li>
+<li><a href="gsp_div.html">gsp_div</a></li>
+<li><a href="gsp_adj2vec.html">gsp_adj2vec</a></li>
+</ul>
+<div id="menutitle">Transforms</div>
+<ul>
+<li><a href="gsp_gft.html">gsp_gft</a></li>
+<li><a href="gsp_igft.html">gsp_igft</a></li>
+<li><a href="gsp_gwft.html">gsp_gwft</a></li>
+<li><a href="gsp_ngwft.html">gsp_ngwft</a></li>
+</ul>
+<div id="menutitle">Pyramid - Reduction</div>
+<ul>
+<li><a href="gsp_kron_reduction.html">gsp_kron_reduction</a></li>
+<li><a href="gsp_kron_pyramid.html">gsp_kron_pyramid</a></li>
+<li><a href="gsp_pyramid_analysis.html">gsp_pyramid_analysis</a></li>
+<li><a href="gsp_pyramid_synthesis.html">gsp_pyramid_synthesis</a></li>
+<li><a href="gsp_pyramid_cell2coeff.html">gsp_pyramid_cell2coeff</a></li>
+<li><a href="gsp_tree_multiresolution.html">gsp_tree_multiresolution</a></li>
+</ul>
+<div id="menutitle">Utils</div>
+<ul>
+<li><a href="gsp_create_laplacian.html">gsp_create_laplacian</a></li>
+<li><a href="gsp_compute_fourier_basis.html">gsp_compute_fourier_basis</a></li>
+</ul>
+
+
+</div>
+</td>
+<td valign="top"  width="80%">
+
+
+
+<div id="content">
+
+<h1 class="title">GSP_KRON_REDUCTION - Compute the kron reduction</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span class="k">function</span><span class="w"> </span>Gnew <span class="p">=</span><span class="w"> </span><span class="nf">gsp_kron_reduction</span><span class="p">(</span> G,ind <span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_KRON_REDUCTION Compute the kron reduction</span>
+<span class="c">%   Usage: Gnew = gsp_kron_reduction( G,ind );</span>
+<span class="c">%          Wnew = gsp_kron_reduction( W,ind );</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters:</span>
+<span class="c">%       G       : Graph structure or weight matrix</span>
+<span class="c">%       ind     : indices of the nodes to keep</span>
+<span class="c">%   Output parameters:</span>
+<span class="c">%       Gnew    : New graph structure or weight matrix       </span>
+<span class="c">%   </span>
+<span class="c">%   This function perform the Kron reduction of the weight matrix in the</span>
+<span class="c">%   graph G, with boundary nodes labeled by ind. This function will</span>
+<span class="c">%   create a new graph with a weight matrix Wnew that contain only boundary</span>
+<span class="c">%   nodes and is computed as the Schur complement of the original matrix</span>
+<span class="c">%   with respect to the selected indices.</span>
+<span class="c">%</span>
+<span class="c">%   If a matrix is given, then a martrix is returned</span>
+<span class="c">%</span>
+<span class="c">%   Example:</span>
+<span class="c">%</span>
+<span class="c">%           N = 64;</span>
+<span class="c">%           param.distribute = 1;</span>
+<span class="c">%           param.Nc = 5;</span>
+<span class="c">%           param.regular = 1;</span>
+<span class="c">%           G = gsp_sensor(N,param);</span>
+<span class="c">%           ind = 1:2:N;</span>
+<span class="c">%           Gnew = gsp_kron_reduction( G,ind );</span>
+<span class="c">%           figure;</span>
+<span class="c">%           subplot(121)</span>
+<span class="c">%           gsp_plot_graph(G);</span>
+<span class="c">%           title(&#39;Original graph&#39;);</span>
+<span class="c">%           subplot(122)</span>
+<span class="c">%           gsp_plot_graph(Gnew);</span>
+<span class="c">%           title(&#39;Kron reduction&#39;);</span>
+<span class="c">%       </span>
+<span class="c">%</span>
+<span class="c">%   References:</span>
+<span class="c">%     F. Dorfler and F. Bullo. Kron reduction of graphs with applications to</span>
+<span class="c">%     electrical networks. Circuits and Systems I: Regular Papers, IEEE</span>
+<span class="c">%     Transactions on, 60(1):150-163, 2013.</span>
+<span class="c">%     </span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   Url: http://gspbox.sourceforge.net/doc/operators/gsp_kron_reduction.php</span>
+
+<span class="c">% Copyright (C) 2013-2014 Nathanael Perraudin, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.2.0</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% Author: Nathanael Perraudin, Pierre Vandergheynst</span>
+<span class="c">% Date  : 23 July 2014</span>
+<span class="c">% Testing: test_operators</span>
+
+
+<span class="k">if</span> <span class="n">isstruct</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">strcmp</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">lap_type</span><span class="p">,</span><span class="s">&#39;combinatorial&#39;</span><span class="p">)</span>
+        <span class="n">error</span><span class="p">(</span><span class="s">&#39;Not implemented&#39;</span><span class="p">);</span>
+    <span class="k">end</span>
+    <span class="k">if</span> <span class="n">G</span><span class="p">.</span><span class="n">directed</span>
+        <span class="n">error</span><span class="p">(</span><span class="s">&#39;GSP_KRON_REDUCTION: this only work for undirected graphs.&#39;</span><span class="p">);</span>
+    <span class="k">end</span>
+    <span class="n">L</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">L</span><span class="p">;</span>
+<span class="k">else</span>
+    <span class="n">L</span> <span class="p">=</span> <span class="n">G</span><span class="p">;</span>
+<span class="k">end</span>
+
+
+<span class="n">N</span> <span class="p">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">ind_comp</span> <span class="p">=</span> <span class="n">setdiff</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">,</span><span class="n">ind</span><span class="p">);</span>
+
+<span class="n">L_red</span> <span class="p">=</span> <span class="n">L</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">ind</span><span class="p">);</span>
+<span class="n">L_in_out</span> <span class="p">=</span> <span class="n">L</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">ind_comp</span><span class="p">);</span>
+<span class="n">L_out_in</span> <span class="p">=</span> <span class="n">L</span><span class="p">(</span><span class="n">ind_comp</span><span class="p">,</span> <span class="n">ind</span><span class="p">);</span>
+<span class="n">L_comp</span> <span class="p">=</span> <span class="n">L</span><span class="p">(</span><span class="n">ind_comp</span><span class="p">,</span> <span class="n">ind_comp</span><span class="p">);</span>
+
+<span class="n">Lnew</span> <span class="p">=</span> <span class="n">L_red</span> <span class="o">-</span> <span class="n">L_in_out</span> <span class="o">*</span> <span class="p">(</span><span class="n">L_comp</span> <span class="o">\</span> <span class="n">L_out_in</span><span class="p">);</span>
+
+<span class="c">% Make the laplacian symetric if it is almost symetric!</span>
+<span class="k">if</span> <span class="n">sum</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">Lnew</span><span class="o">-</span><span class="n">transpose</span><span class="p">(</span><span class="n">Lnew</span><span class="p">))))</span><span class="o">&lt;</span><span class="nb">eps</span><span class="o">*</span><span class="n">sum</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">Lnew</span><span class="p">)))</span>
+    <span class="n">Lnew</span> <span class="p">=</span> <span class="p">(</span><span class="n">Lnew</span><span class="o">+</span><span class="n">transpose</span><span class="p">(</span><span class="n">Lnew</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="n">isstruct</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="c">% Suppress the diagonal ? This is a good question?</span>
+    <span class="n">Wnew</span> <span class="p">=</span> <span class="nb">diag</span><span class="p">(</span><span class="nb">diag</span><span class="p">(</span><span class="n">Lnew</span><span class="p">))</span> <span class="o">-</span> <span class="n">Lnew</span><span class="p">;</span>
+    <span class="n">Snew</span> <span class="p">=</span> <span class="nb">diag</span><span class="p">(</span><span class="n">Lnew</span><span class="p">)</span> <span class="o">-</span> <span class="n">transpose</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">Wnew</span><span class="p">));</span>
+    <span class="k">if</span> <span class="n">norm</span><span class="p">(</span><span class="n">Snew</span><span class="p">)</span><span class="o">&lt;</span><span class="nb">eps</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="n">Snew</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">end</span>
+    <span class="n">Wnew</span> <span class="p">=</span> <span class="n">Wnew</span> <span class="o">+</span> <span class="nb">diag</span><span class="p">(</span><span class="n">Snew</span><span class="p">);</span>
+    
+    <span class="n">Gnew</span> <span class="p">=</span> <span class="n">gsp_copy_graph_attributes</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+    <span class="n">Gnew</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">limits</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">limits</span><span class="p">;</span>
+    <span class="n">Gnew</span><span class="p">.</span><span class="n">coords</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">ind</span><span class="p">,:);</span>
+    <span class="n">Gnew</span><span class="p">.</span><span class="n">W</span> <span class="p">=</span> <span class="n">Wnew</span><span class="p">;</span>
+    <span class="n">Gnew</span><span class="p">.</span><span class="n">type</span><span class="p">=</span><span class="s">&#39;Kron reduction&#39;</span><span class="p">;</span>
+    <span class="n">Gnew</span> <span class="p">=</span> <span class="n">gsp_graph_default_parameters</span><span class="p">(</span><span class="n">Gnew</span><span class="p">);</span>
+
+<span class="k">else</span>
+    <span class="n">Gnew</span> <span class="p">=</span> <span class="n">Lnew</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="k">end</span>
+</pre></div>
+
+
+
+</div>
+
+
+</td>
+</tr>
+</table>
+</div>
+<div id="space"></div>
+<div id="footer">
+Designed by: Nathanael Perraudin, David Shuman, Johan Paratte
+</div>
+</div>
+
+</body>
+</html>
+
+
+

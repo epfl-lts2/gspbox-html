@@ -1,0 +1,196 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_DEMO_GRAPH_EMBEDDING - Demonstration file for graph embeddings</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_demo_graph_embedding_code.html">View the code</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p><div id="menutitle">See also:</div>
+<ul>
+<li><a href="#BASEURL#/doc/graphs/gsp_nn_graph.html">gsp_nn_graph</a></li>
+<li><a href="#BASEURL#/doc/embedding/gsp_compute_coordinates.html">gsp_compute_coordinates</a></li>
+<li><a href="#BASEURL#/doc/graphs/gsp_update_coordinates.html">gsp_update_coordinates</a></li>
+<li><a href="#BASEURL#/doc/plotting/gsp_plot_signal.html">gsp_plot_signal</a></li>
+</ul>
+</p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_DEMO_GRAPH_EMBEDDING - Demonstration file for graph embeddings</h1>
+
+<div class="section" id="xxxdescription">
+<h2>Description</h2>
+<p>In this demo we perform a low-dimensional embedding on a specific graph
+using three different algorithms and we plot the resulting embeddings
+on a single plot. At first we create a 2-D sensor graph embedded in a
+3-D space. We then compute 3 different embeddings for this graph:
+Laplacian eigenmaps, LLE, and Isomap.</p>
+</div>
+<div class="section" id="laplacian-eigenmaps">
+<h2>Laplacian eigenmaps</h2>
+<p>This function uses the Laplacian of the graph and the diagonal degree
+matrix to compute the eigenvalues and eigenvectors of generalized
+eigenvector problem, <span class="math">\(L U =  D U \Lambda\)</span>. The coordinates of the
+embedding are the eigenvectors that correspond to the bottom <em>dim</em>
+eigenvalues (ignoring always the zero eigenvalue).</p>
+</div>
+<div class="section" id="locally-linear-embedding-lle">
+<h2>Locally Linear Embedding (LLE)</h2>
+<p>This method first converts the weighed adjacency matrix to a distance
+matrix. Then it computes another weight matrix <span class="math">\(A\)</span> by minimizing each
+reconstruction error <span class="math">\(\epsilon = \|x -\sum_j a_j x_j \|^2\)</span> where the
+<span class="math">\(x_j\)</span> are the neighboors of <span class="math">\(x\)</span>. To do so we first compute the
+following local covariance matrix:</p>
+<!-- C_{jk} = \frac{1}{2} (D_{:, j}+D_{i, :}-D_{ij}-D_{:,:}) -->
+<div class="math">
+\begin{equation*}
+C_{jk} = \frac{1}{2} (D_{\cdot j}+D_{i, \cdot}-D_{ij}-D_{\cdot \cdot})
+\end{equation*}
+</div>
+<p>where <span class="math">\(D_{ij}\)</span> is the squared distance matrix,</p>
+<!-- D_{:, j} = \frac{1}{n} \sum_i D_{ij}, -->
+<!-- D_{i,:} = \frac{1}{n} \sum_j D_{ij}, -->
+<!-- D_{:,:} = \frac{1}{n^2} \sum_i \sum_j D_{ij}, -->
+<div class="math">
+\begin{equation*}
+D_{\cdot, j} = \frac{1}{n} \sum_i D_{ij},
+\end{equation*}
+</div>
+<div class="math">
+\begin{equation*}
+D_{i,\cdot} = \frac{1}{n} \sum_j D_{ij},
+\end{equation*}
+</div>
+<div class="math">
+\begin{equation*}
+D_{\cdot, \cdot} = \frac{1}{n^2} \sum_i \sum_j D_{ij},
+\end{equation*}
+</div>
+<p>and where <span class="math">\(D\)</span> is the <span class="math">\(n\)</span> by <span class="math">\(n\)</span> squared distance matrix (<span class="math">\(D = d^2\)</span>).
+One can observe that the local covariance matrix is simply a
+Multi-Dimensional Scaling (MDS) of the squared distance matrix <span class="math">\(D\)</span>.</p>
+<p>We calculate the weight matrix <span class="math">\(A\)</span> by solving the system of linear
+equations <span class="math">\(\sum_k C_{jk}a_k=1\)</span> and rescale the weights so that any
+column of <span class="math">\(A\)</span> sums up to <span class="math">\(1\)</span>. Finally the coordinates of the embedding are
+the eigenvectors of the matrix <span class="math">\(M = (I - A)^T(I - A)\)</span>. More precisely
+the coordinates of the embedding are the eigenvectors that correspond
+to the dim+1 bottom eigenvalues of M (we always ignore the first
+eigenvector since the first eigenvalue is always zero) leaving us with
+a dim dimensional embedding.</p>
+</div>
+<div class="section" id="isomap">
+<h2>Isomap</h2>
+<p>This algorithm computes the embedding using the distance matrix <span class="math">\(d\)</span>.
+Firstly we compute the dijkstra distance of all possible nodes of the
+graph. We store these values squared in a matrix <span class="math">\(D\)</span> where <span class="math">\(D_{ij}\)</span> is
+the squared dijkstra distance from node <span class="math">\(i\)</span> to node <span class="math">\(j\)</span>. Continuing we
+performe a MDS on the squared dijkstra matrix <span class="math">\(D\)</span>. This way we compute
+Matrix <span class="math">\(B\)</span> as</p>
+<!-- B_{jk} = 0.5 * (D_{:, j}+D_{i,:}-D_{ij}- D_{:,:}). -->
+<div class="math">
+\begin{equation*}
+B_{jk} = \frac{1}{2} \left(D_{\cdot j}+D_{i \cdot}-D_{ij} - D_{\cdot \cdot} \right).
+\end{equation*}
+</div>
+<p>Finally the coordinates of the embedding are the eigenvectors that
+corespond to the top dim eigenvalues. Finaly one can scale the
+coordinates as <span class="math">\(X=\Gamma \Lambda ^{1/2}\)</span> where <span class="math">\(\Lambda\)</span> is the
+diagonal matrix of dim top eigenvalues of <span class="math">\(B\)</span> and <span class="math">\(\Gamma\)</span> is the
+matrix of the corresponding eigenvectors.</p>
+<p>The signal on the graph is related to the coordinate information of the
+original graph and therefore allows us to evaluate the resulting
+embedding by looking at the smoothness of this signal on the graph.</p>
+<div class="figure align-center">
+<img alt="gsp_demo_graph_embedding_1.png" src="gsp_demo_graph_embedding_1.png" />
+<p class="caption">Resulting embeddings</p>
+</div>
+<p><em>This code produces the following output</em>:</p>
+<pre class="literal-block">
+GSPBox version 0.7.4. Copyright 2013-2015 LTS2-EPFL,
+by Nathanael Perraudin, Johan Paratte, David Shuman and Vassilis Kalofolias
+</pre>
+</div>
+<H2>References:</H2>
+
+
+
+<p><a name="saul2000introduction"></a>
+
+L.&nbsp;K. Saul and S.&nbsp;T. Roweis.
+ An introduction to locally linear embedding.
+ <em>unpublished. Available at: http://www. cs. toronto. edu/&tilde;
+  roweis/lle/publications. html</em>, 2000.
+
+</p>
+
+<p><a name="belkin2001laplacian"></a>
+
+M.&nbsp;Belkin and P.&nbsp;Niyogi.
+ Laplacian eigenmaps and spectral techniques for embedding and
+  clustering.
+ In <em>NIPS</em>, volume&nbsp;14, pages 585--591, 2001.
+
+</p>
+
+<p><a name="tenenbaum2000global"></a>
+
+J.&nbsp;B. Tenenbaum, V.&nbsp;De&nbsp;Silva, and J.&nbsp;C. Langford.
+ A global geometric framework for nonlinear dimensionality reduction.
+ <em>Science</em>, 290(5500):2319--2323, 2000.
+
+</p>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

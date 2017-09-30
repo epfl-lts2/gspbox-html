@@ -1,0 +1,165 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_JTV_COMPUTE_FRAME - Compute the frame tensor of the kernel g on the time-vertex graph G</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_jtv_compute_frame.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p></p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_JTV_COMPUTE_FRAME - Compute the frame tensor of the kernel g on the time-vertex graph G</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span>F <span class="p">=</span><span class="w"> </span><span class="nf">gsp_jtv_compute_frame</span><span class="p">(</span>G,g,filtertype<span class="p">)</span><span class="w"></span>
+<span class="c">% GSP_JTV_COMPUTE_FRAME Compute the frame tensor of the kernel g on the time-vertex graph G</span>
+<span class="c">%   Usage:  F = gsp_jtv_compute_frame(G,g);</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters:</span>
+<span class="c">%         G          : Time-Vertex Graph structure</span>
+<span class="c">%         g          : Cell array of time-vertex filters</span>
+<span class="c">%         filtertype : Filter domain (ts,js,ts-array,js-array)</span>
+<span class="c">%   Output parameters:</span>
+<span class="c">%         F          : Frame tensor (vertex_loc x time_loc x vertex x time)</span>
+<span class="c">%</span>
+<span class="c">%   Compute the frame tensor of the kernel g on the time-vertex graph G</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/filters/gsp_jtv_compute_frame.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+<span class="c">% Author :  Francesco Grassi</span>
+<span class="c">% Date : September 2016</span>
+
+
+<span class="k">if</span> <span class="n">or</span><span class="p">(</span><span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">jtv</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">),</span><span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">jtv</span><span class="p">,</span><span class="s">&#39;fs&#39;</span><span class="p">))</span>
+    <span class="n">error</span><span class="p">(</span><span class="s">&#39;GSP_JTV_COMPUTE_FRAME need the time dimension. Use GSP_JTV_GRAPH.&#39;</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">iscell</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="n">g</span> <span class="p">=</span> <span class="p">{</span><span class="n">g</span><span class="p">};</span>
+<span class="k">end</span>
+
+<span class="n">Nf</span> <span class="p">=</span> <span class="nb">numel</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+
+<span class="n">T</span>   <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">jtv</span><span class="p">.</span><span class="n">T</span><span class="p">;</span>
+<span class="n">lag</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">jtv</span><span class="p">.</span><span class="n">lag</span><span class="p">;</span>
+<span class="n">fs</span>  <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">jtv</span><span class="p">.</span><span class="n">fs</span><span class="p">;</span>
+<span class="n">N</span>   <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">N</span><span class="p">;</span>
+
+
+<span class="n">F</span> <span class="p">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">lag</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">Nf</span><span class="p">);</span>
+<span class="n">param</span><span class="p">.</span><span class="n">lag</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">jtv</span><span class="p">.</span><span class="n">extension</span><span class="p">;</span>
+
+<span class="k">for</span> <span class="n">n</span> <span class="p">=</span> <span class="mi">1</span><span class="p">:</span><span class="n">Nf</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">=</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span>
+        <span class="k">for</span> <span class="n">jj</span><span class="p">=</span><span class="mi">1</span><span class="p">:</span><span class="n">lag</span>
+            <span class="n">F</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span><span class="n">jj</span><span class="p">,:,:,</span><span class="n">n</span><span class="p">)</span> <span class="p">=</span> <span class="n">gsp_jtv_filter_synthesis</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="n">g</span><span class="p">{</span><span class="n">n</span><span class="p">},</span><span class="n">filtertype</span><span class="p">,</span><span class="n">gsp_jtv_delta</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="n">ii</span><span class="p">,</span><span class="n">jj</span><span class="o">-</span><span class="n">T</span><span class="o">*</span><span class="n">param</span><span class="p">.</span><span class="n">lag</span><span class="p">,</span><span class="n">param</span><span class="p">));</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+    
+<span class="k">end</span>
+
+
+<span class="k">end</span>
+
+
+
+
+<span class="c">%OLD CODE</span>
+<span class="c">% t = 0:1/fs:(T-1)/fs;</span>
+<span class="c">% tau = -(T-1):1/fs:(T-1);</span>
+<span class="c">%</span>
+<span class="c">% for n = 1:Nf</span>
+<span class="c">%     n</span>
+<span class="c">%     for jj=1:2*T-1</span>
+<span class="c">%         for ii = 1:T</span>
+<span class="c">%</span>
+<span class="c">%             tt=t(ii)-tau(jj);</span>
+<span class="c">%</span>
+<span class="c">%             h = gsp_jtv_filterbank(g,tt);</span>
+<span class="c">%</span>
+<span class="c">%             psi = real(gsp_filter_analysis(G,h{n},eye(N)));</span>
+<span class="c">%</span>
+<span class="c">%             F(:,jj,:,ii,n) = psi;</span>
+<span class="c">%</span>
+<span class="c">%         end</span>
+<span class="c">%     end</span>
+<span class="c">% end</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

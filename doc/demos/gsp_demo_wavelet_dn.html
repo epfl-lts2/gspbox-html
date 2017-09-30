@@ -1,0 +1,135 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_DEMO_WAVELET_DN - Demonstratration of the use of wavelet for denoising</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_demo_wavelet_dn_code.html">View the code</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p></p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_DEMO_WAVELET_DN - Demonstratration of the use of wavelet for denoising</h1>
+<h2 class="subtitle" id="xxxdescription">Description</h2>
+
+<p>In this small example, we show how to perform wavelet denoising using
+the GSPBox and particularly the function <span class="linkrole"><a href="#BASEURL#/doc/prox/gsp_wavelet_dn.html">gsp_wavelet_dn</a></span> .</p>
+<p>The function <span class="linkrole"><a href="#BASEURL#/doc/prox/gsp_wavelet_dn.html">gsp_wavelet_dn</a></span> removes the low frequency part of the
+signal and solves a l1 minimization problem to remove the noise.</p>
+<div class="figure align-center">
+<img alt="gsp_demo_wavelet_dn_1.png" src="gsp_demo_wavelet_dn_1.png" />
+<p class="caption">Result of filtering</p>
+<div class="legend">
+We observe that the wavelet denoising allows rapid change on the
+graph signal. This is not possible with a simple low pass filtering.</div>
+</div>
+<div class="figure align-center">
+<img alt="gsp_demo_wavelet_dn_2.png" src="gsp_demo_wavelet_dn_2.png" />
+<p class="caption">Choosen wavelet filterbank</p>
+<div class="legend">
+Here we use a mexican hat frame for the wavelet construction.</div>
+</div>
+<p><em>This code produces the following output</em>:</p>
+<pre class="literal-block">
+A function has both the prox and a grad fields. The gradient is used
+The time step is set manually to : 0.5
+Algorithm selected: FORWARD_BACKWARD
+Iter 001:     prox_L1: ||A x-y||_1 = 0.000000e+00, REL_OB, iter = 2
+  f(x^*) = 1.635623e+01, rel_eval = 1.918014e+02
+Iter 002:     prox_L1: ||A x-y||_1 = 0.000000e+00, REL_OB, iter = 2
+  f(x^*) = 1.635623e+01, rel_eval = 0.000000e+00
+
+ FORWARD_BACKWARD:
+  f(x^*) = 1.635623e+01, rel_eval = 0.000000e+00
+ 2 iterations
+ Stopping criterion: REL_NORM_OBJ
+
+A function has both the prox and a grad fields. The gradient is used
+The time step is set manually to : 0.5
+Algorithm selected: FORWARD_BACKWARD
+Iter 001:     prox_L1: ||A x-y||_1 = 3.950718e+00, REL_OB, iter = 2
+  f(x^*) = 1.842782e+01, rel_eval = 1.307758e+00
+Iter 002:     prox_L1: ||A x-y||_1 = 1.905458e+00, REL_OB, iter = 2
+  f(x^*) = 1.490933e+01, rel_eval = 2.359922e-01
+Iter 003:     prox_L1: ||A x-y||_1 = 1.791944e+00, REL_OB, iter = 2
+  f(x^*) = 1.468075e+01, rel_eval = 1.556998e-02
+Iter 004:     prox_L1: ||A x-y||_1 = 1.829279e+00, REL_OB, iter = 2
+  f(x^*) = 1.457597e+01, rel_eval = 7.188845e-03
+Iter 005:     prox_L1: ||A x-y||_1 = 1.894864e+00, REL_OB, iter = 2
+  f(x^*) = 1.451468e+01, rel_eval = 4.222307e-03
+Iter 006:     prox_L1: ||A x-y||_1 = 1.952902e+00, REL_OB, iter = 2
+  f(x^*) = 1.446909e+01, rel_eval = 3.150956e-03
+Iter 007:     prox_L1: ||A x-y||_1 = 1.999188e+00, REL_OB, iter = 2
+  f(x^*) = 1.443249e+01, rel_eval = 2.536113e-03
+Iter 008:     prox_L1: ||A x-y||_1 = 2.032134e+00, REL_OB, iter = 2
+  f(x^*) = 1.440235e+01, rel_eval = 2.092857e-03
+Iter 009:     prox_L1: ||A x-y||_1 = 2.048022e+00, REL_OB, iter = 2
+  f(x^*) = 1.437391e+01, rel_eval = 1.978575e-03
+Iter 010:     prox_L1: ||A x-y||_1 = 2.053312e+00, REL_OB, iter = 2
+  f(x^*) = 1.434766e+01, rel_eval = 1.829546e-03
+Iter 011:     prox_L1: ||A x-y||_1 = 2.064799e+00, REL_OB, iter = 2
+  f(x^*) = 1.432871e+01, rel_eval = 1.322199e-03
+Iter 012:     prox_L1: ||A x-y||_1 = 2.076503e+00, REL_OB, iter = 2
+  f(x^*) = 1.431229e+01, rel_eval = 1.147399e-03
+Iter 013:     prox_L1: ||A x-y||_1 = 2.090651e+00, REL_OB, iter = 2
+  f(x^*) = 1.429848e+01, rel_eval = 9.659487e-04
+
+ FORWARD_BACKWARD:
+  f(x^*) = 1.429848e+01, rel_eval = 9.659487e-04
+ 13 iterations
+ Stopping criterion: REL_NORM_OBJ
+</pre>
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

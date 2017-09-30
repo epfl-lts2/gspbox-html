@@ -1,0 +1,151 @@
+ 
+<!DOCTYPE html PUBLIC "-//W3C//DTD html 4.0//EN">
+<html>
+<head>
+<title>GSP_CREATE_LAPLACIAN - create the graph laplacian of the graph G</title>
+<link rel="stylesheet" href="../include/mat2doc.css" type="text/css">
+<link rel="stylesheet" href="../include/color_text.css" type="text/css">
+<META NAME="keywords" CONTENT=""/> 
+
+<!-- Script to enable latex equations with MathJax -->
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+</head>
+
+<div id="container">
+<div id="header">
+<table style="height:100%; width:100%">
+<tr>
+<td valign="top" width="75%">
+<h1>The title of my toolbox</h1>
+
+<h2>Short description of my toolbox</h2>
+</td>
+<td valign="middle">
+<a href="./index.php"><img src="../include/logo_tr.png" alt="Logo" height="70"></a>
+</td>
+</tr>
+</table> 
+</div>
+<div id="space"></div>
+<div id="main_content">
+<table width="100%">
+<tr>
+<td valign="top" width="20%">
+<div id="menu">
+<div id="menutitle"><a href="gsp_create_laplacian_code.html">View the code</a></div>
+
+
+<div id="menutitle">Localisation</div>
+<ul>
+<li><a href="gsp_translate.html">gsp_translate</a></li>
+<li><a href="gsp_modulate.html">gsp_modulate</a></li>
+<li><a href="gsp_localize.html">gsp_localize</a></li>
+</ul>
+<div id="menutitle">Differential</div>
+<ul>
+<li><a href="gsp_grad_mat.html">gsp_grad_mat</a></li>
+<li><a href="gsp_grad.html">gsp_grad</a></li>
+<li><a href="gsp_div.html">gsp_div</a></li>
+<li><a href="gsp_adj2vec.html">gsp_adj2vec</a></li>
+</ul>
+<div id="menutitle">Transforms</div>
+<ul>
+<li><a href="gsp_gft.html">gsp_gft</a></li>
+<li><a href="gsp_igft.html">gsp_igft</a></li>
+<li><a href="gsp_gwft.html">gsp_gwft</a></li>
+<li><a href="gsp_ngwft.html">gsp_ngwft</a></li>
+</ul>
+<div id="menutitle">Pyramid - Reduction</div>
+<ul>
+<li><a href="gsp_kron_reduction.html">gsp_kron_reduction</a></li>
+<li><a href="gsp_kron_pyramid.html">gsp_kron_pyramid</a></li>
+<li><a href="gsp_pyramid_analysis.html">gsp_pyramid_analysis</a></li>
+<li><a href="gsp_pyramid_synthesis.html">gsp_pyramid_synthesis</a></li>
+<li><a href="gsp_pyramid_cell2coeff.html">gsp_pyramid_cell2coeff</a></li>
+<li><a href="gsp_tree_multiresolution.html">gsp_tree_multiresolution</a></li>
+</ul>
+<div id="menutitle">Utils</div>
+<ul>
+<li><a href="gsp_create_laplacian.html">gsp_create_laplacian</a></li>
+<li><a href="gsp_compute_fourier_basis.html">gsp_compute_fourier_basis</a></li>
+</ul>
+
+
+</div>
+</td>
+<td valign="top"  width="80%">
+
+
+
+<div id="content">
+
+<h1 class="title">GSP_CREATE_LAPLACIAN - create the graph laplacian of the graph G</h1>
+
+<div class="section" id="usage">
+<h2>Usage</h2>
+<pre class="literal-block">
+G = gsp_create_laplacian( G,type );
+G = gsp_create_laplacian( G );
+</pre>
+</div>
+<div class="section" id="input-parameters">
+<h2>Input parameters</h2>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option"><var>G</var></span></kbd></td>
+<td>Graph structure (or cell array of graph structure)</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option"><var>type</var></span></kbd></td>
+<td>Type of laplacian (string)</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="output-parameters">
+<h2>Output parameters</h2>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option"><var>G</var></span></kbd></td>
+<td>Graph structure (or cell array of graph structure)</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="xxxdescription">
+<h2>Description</h2>
+<p>This function create the graph laplacian of the graph G and store it
+into G.</p>
+<p>The variable <em>type</em> contains the different laplacian type.</p>
+<ul class="simple">
+<li><em>combinatorial</em>: Non normalized laplacian. This is the default.</li>
+<li><em>normalized</em>: Normalized laplacian</li>
+<li><em>none</em>: No laplacian</li>
+</ul>
+</div>
+
+
+</div>
+
+
+</td>
+</tr>
+</table>
+</div>
+<div id="space"></div>
+<div id="footer">
+Designed by: Nathanael Perraudin, David Shuman, Johan Paratte
+</div>
+</div>
+
+</body>
+</html>
+
+
+

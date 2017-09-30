@@ -1,0 +1,212 @@
+ 
+<!DOCTYPE html PUBLIC "-//W3C//DTD html 4.0//EN">
+<html>
+<head>
+<title>GSP_COMPUTE_FOURIER_BASIS - Compute the fourier basis of the graph G</title>
+<link rel="stylesheet" href="../include/mat2doc.css" type="text/css">
+<link rel="stylesheet" href="../include/color_text.css" type="text/css">
+<META NAME="keywords" CONTENT=""/> 
+
+<!-- Script to enable latex equations with MathJax -->
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+</head>
+
+<div id="container">
+<div id="header">
+<table style="height:100%; width:100%">
+<tr>
+<td valign="top" width="75%">
+<h1>The title of my toolbox</h1>
+
+<h2>Short description of my toolbox</h2>
+</td>
+<td valign="middle">
+<a href="./index.php"><img src="../include/logo_tr.png" alt="Logo" height="70"></a>
+</td>
+</tr>
+</table> 
+</div>
+<div id="space"></div>
+<div id="main_content">
+<table width="100%">
+<tr>
+<td valign="top" width="20%">
+<div id="menu">
+<div id="menutitle"><a href="gsp_compute_fourier_basis.html">View the help</a></div>
+
+
+<div id="menutitle">Localisation</div>
+<ul>
+<li><a href="gsp_translate.html">gsp_translate</a></li>
+<li><a href="gsp_modulate.html">gsp_modulate</a></li>
+<li><a href="gsp_localize.html">gsp_localize</a></li>
+</ul>
+<div id="menutitle">Differential</div>
+<ul>
+<li><a href="gsp_grad_mat.html">gsp_grad_mat</a></li>
+<li><a href="gsp_grad.html">gsp_grad</a></li>
+<li><a href="gsp_div.html">gsp_div</a></li>
+<li><a href="gsp_adj2vec.html">gsp_adj2vec</a></li>
+</ul>
+<div id="menutitle">Transforms</div>
+<ul>
+<li><a href="gsp_gft.html">gsp_gft</a></li>
+<li><a href="gsp_igft.html">gsp_igft</a></li>
+<li><a href="gsp_gwft.html">gsp_gwft</a></li>
+<li><a href="gsp_ngwft.html">gsp_ngwft</a></li>
+</ul>
+<div id="menutitle">Pyramid - Reduction</div>
+<ul>
+<li><a href="gsp_kron_reduction.html">gsp_kron_reduction</a></li>
+<li><a href="gsp_kron_pyramid.html">gsp_kron_pyramid</a></li>
+<li><a href="gsp_pyramid_analysis.html">gsp_pyramid_analysis</a></li>
+<li><a href="gsp_pyramid_synthesis.html">gsp_pyramid_synthesis</a></li>
+<li><a href="gsp_pyramid_cell2coeff.html">gsp_pyramid_cell2coeff</a></li>
+<li><a href="gsp_tree_multiresolution.html">gsp_tree_multiresolution</a></li>
+</ul>
+<div id="menutitle">Utils</div>
+<ul>
+<li><a href="gsp_create_laplacian.html">gsp_create_laplacian</a></li>
+<li><a href="gsp_compute_fourier_basis.html">gsp_compute_fourier_basis</a></li>
+</ul>
+
+
+</div>
+</td>
+<td valign="top"  width="80%">
+
+
+
+<div id="content">
+
+<h1 class="title">GSP_COMPUTE_FOURIER_BASIS - Compute the fourier basis of the graph G</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span class="k">function</span><span class="w"> </span>[G] <span class="p">=</span><span class="w"> </span><span class="nf">gsp_compute_fourier_basis</span><span class="p">(</span>G,param<span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_COMPUTE_FOURIER_BASIS Compute the fourier basis of the graph G</span>
+<span class="c">%   Usage:  G = gsp_full_eigen(G);</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters:</span>
+<span class="c">%         G          : Graph structure (or cell array of graph structure) </span>
+<span class="c">%         param      : structure of optional parameters</span>
+<span class="c">%   Output parameters:</span>
+<span class="c">%         G          : Graph structure (or cell array of graph structure)</span>
+<span class="c">%</span>
+<span class="c">%   &#39;gsp_full_eigen(G)&#39; computes a full eigendecomposition of the graph</span>
+<span class="c">%   Laplacian G.L:</span>
+<span class="c">%</span>
+<span class="c">%      L = U Lambda U* </span>
+<span class="c">%</span>
+<span class="c">%   where Lambda is a diagonal matrix of the Laplacian eigenvalues. </span>
+<span class="c">%   G.e is a column vector of length G.N containing the Laplacian</span>
+<span class="c">%   eigenvalues. The function will store the basis U, the eigenvalues</span>
+<span class="c">%   e, the maximum eigenvalue lmax and G.mu the coherence of the</span>
+<span class="c">%   Fourier basis into the structure G.</span>
+<span class="c">% </span>
+<span class="c">%   Example:</span>
+<span class="c">%</span>
+<span class="c">%       N = 50;</span>
+<span class="c">%       G = gsp_sensor(N);</span>
+<span class="c">%       G = gsp_compute_fourier_basis(G);</span>
+<span class="c">%       gsp_plot_signal(G,G.U(:,2));</span>
+<span class="c">% </span>
+<span class="c">%   References:</span>
+<span class="c">%     F. R. K. Chung. Spectral Graph Theory. Vol. 92 of the CBMS Regional</span>
+<span class="c">%     Conference Series in Mathematics, American Mathematical Society, 1997.</span>
+<span class="c">%     </span>
+<span class="c">%     </span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   Url: http://gspbox.sourceforge.net/doc/operators/gsp_compute_fourier_basis.php</span>
+
+<span class="c">% Copyright (C) 2013-2014 Nathanael Perraudin, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.2.0</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% Author : David I Shuman, Nathanael Perraudin</span>
+<span class="c">% Testing: test_operators</span>
+
+<span class="k">if</span> <span class="n">nargin</span> <span class="o">&lt;</span> <span class="mi">2</span>
+    <span class="n">param</span> <span class="p">=</span> <span class="n">struct</span><span class="p">;</span>
+<span class="k">end</span>
+
+
+<span class="k">if</span> <span class="nb">numel</span><span class="p">(</span><span class="n">G</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span>
+    <span class="n">Ng</span> <span class="p">=</span> <span class="nb">numel</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="p">=</span> <span class="mi">1</span><span class="p">:</span><span class="n">Ng</span>
+       <span class="n">G</span><span class="p">{</span><span class="n">ii</span><span class="p">}</span> <span class="p">=</span> <span class="n">gsp_compute_fourier_basis</span><span class="p">(</span><span class="n">G</span><span class="p">{</span><span class="n">ii</span><span class="p">},</span> <span class="n">param</span><span class="p">);</span>
+    <span class="k">end</span>     
+    <span class="k">return</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;verbose&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
+
+<span class="k">if</span> <span class="p">(</span> <span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;e&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;U&#39;</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span>
+        <span class="n">warning</span><span class="p">([</span><span class="s">&#39;Laplacian eigenvalues or eigenvectors &#39;</span><span class="p">,</span><span class="c">...</span>
+            <span class="s">&#39;are already associated with this graph&#39;</span><span class="p">]);</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="n">G</span><span class="p">.</span><span class="n">N</span> <span class="o">&gt;</span> <span class="mi">3000</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span>
+        <span class="n">warning</span><span class="p">([</span><span class="s">&#39;Performing full eigendecomposition &#39;</span><span class="p">,</span><span class="c">...</span>
+            <span class="s">&#39;of a large matrix may take some time...&#39;</span><span class="p">]);</span> 
+    <span class="k">end</span>
+<span class="k">end</span>
+    
+<span class="k">if</span> <span class="p">(</span> <span class="n">strcmp</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">type</span><span class="p">,</span><span class="s">&#39;ring&#39;</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="nb">mod</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">N</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span> <span class="p">)</span>
+    <span class="n">U</span> <span class="p">=</span> <span class="n">dftmtx</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">N</span><span class="p">)</span><span class="o">/</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">N</span><span class="p">);</span>
+    <span class="n">E</span> <span class="p">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="nb">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="nb">pi</span><span class="o">*</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">G</span><span class="p">.</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">&#39;/</span><span class="n">G</span><span class="p">.</span><span class="n">N</span><span class="p">));</span>
+    <span class="n">inds</span> <span class="p">=</span> <span class="n">gsp_classic2graph_eig_order</span><span class="p">(</span> <span class="n">G</span><span class="p">.</span><span class="n">N</span> <span class="p">);</span>
+<span class="c">%     [G.E, inds]=sort(E,&#39;ascend&#39;);</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">e</span> <span class="p">=</span> <span class="n">E</span><span class="p">(</span><span class="n">inds</span><span class="p">);</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">U</span> <span class="p">=</span> <span class="n">U</span><span class="p">(:,</span><span class="n">inds</span><span class="p">);</span>
+<span class="k">else</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;L&#39;</span><span class="p">)</span>
+        <span class="n">error</span><span class="p">(</span><span class="s">&#39;Graph Laplacian is not provided.&#39;</span><span class="p">);</span>
+    <span class="k">end</span>
+    <span class="p">[</span><span class="n">G</span><span class="p">.</span><span class="n">U</span><span class="p">,</span> <span class="n">G</span><span class="p">.</span><span class="n">e</span><span class="p">]</span> <span class="p">=</span> <span class="n">gsp_full_eigen</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">L</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="n">G</span><span class="p">.</span><span class="n">lmax</span><span class="p">=</span><span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">e</span><span class="p">);</span>
+
+<span class="n">G</span><span class="p">.</span><span class="n">mu</span> <span class="p">=</span> <span class="n">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">U</span><span class="p">(:)));</span>
+
+<span class="k">end</span>
+</pre></div>
+
+
+
+</div>
+
+
+</td>
+</tr>
+</table>
+</div>
+<div id="space"></div>
+<div id="footer">
+Designed by: Nathanael Perraudin, David Shuman, Johan Paratte
+</div>
+</div>
+
+</body>
+</html>
+
+
+

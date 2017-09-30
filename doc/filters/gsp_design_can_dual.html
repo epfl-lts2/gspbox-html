@@ -1,0 +1,118 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_DESIGN_CAN_DUAL - This function return the canonical dual filters of g</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_design_can_dual_code.html">View the code</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p><div id="menutitle">See also:</div>
+<ul>
+<li><a href="#BASEURL#/doc/filters/gsp_evaluate_can_dual.html">gsp_evaluate_can_dual</a></li>
+</ul>
+</p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_DESIGN_CAN_DUAL - This function return the canonical dual filters of g</h1>
+
+<div class="section" id="usage">
+<h2>Usage</h2>
+<pre class="literal-block">
+gd = gsp_design_can_dual( g );
+</pre>
+</div>
+<div class="section" id="xxxdescription">
+<h2>Description</h2>
+<dl class="docutils">
+<dt>Inputs parameters:</dt>
+<dd>g       : cell array of filters
+tol     : tolerance for the pseudo-inverse</dd>
+<dt>Ouputs parameters:</dt>
+<dd>g       : cell array of filters</dd>
+</dl>
+<p>This function returns the canonical dual filterbank g. Note that it
+might not be the be the optimal solution in term of computation.</p>
+<p>Example:</p>
+<pre class="literal-block">
+N = 100;
+G = gsp_sensor(N);
+G = gsp_compute_fourier_basis(G);
+g = gsp_design_abspline(G,8);
+gd = gsp_design_can_dual(g);
+paramplot.show_sum = 0;
+figure(1)
+gsp_plot_filter(G,g,paramplot);
+title('Original filters')
+figure(2)
+gsp_plot_filter(G,gd,paramplot);
+title('Canonical dual filters');
+
+x = rand(N,1);
+param.method = 'exact';
+coeff = gsp_filter_analysis(G,g,x,param);
+xs = gsp_filter_synthesis(G,gd,coeff,param);
+norm(xs-x)
+</pre>
+<p><em>This code produces the following output</em>:</p>
+<pre class="literal-block">
+ans =
+
+   1.1674e-14
+</pre>
+<img alt="gsp_design_can_dual_1_1.png" class="align-center" src="gsp_design_can_dual_1_1.png" />
+<img alt="gsp_design_can_dual_1_2.png" class="align-center" src="gsp_design_can_dual_1_2.png" />
+</div>
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

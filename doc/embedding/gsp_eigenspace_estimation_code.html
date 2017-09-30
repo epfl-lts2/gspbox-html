@@ -1,0 +1,235 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_EIGENSPACE_ESTIMATION - Estimation of first eigenvectors of any graph Laplacian</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_eigenspace_estimation.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p></p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_EIGENSPACE_ESTIMATION - Estimation of first eigenvectors of any graph Laplacian</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span>[ basis, filt_sig, param ] <span class="p">=</span><span class="w"> </span><span class="nf">gsp_eigenspace_estimation</span><span class="p">(</span> G, k, param <span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_EIGENSPACE_ESTIMATION Estimation of first eigenvectors of any graph Laplacian</span>
+<span class="c">%   Usage:  basis = gsp_eigenspace_estimation(G,k);</span>
+<span class="c">%           [basis, approx_U, param] = gsp_eigenspace_estimation(G,k,param);</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters :</span>
+<span class="c">%         G          : Graph structure.</span>
+<span class="c">%         k          : Dimension of the subspace.</span>
+<span class="c">%         param      : Optional parameters</span>
+<span class="c">%   Output parameters:</span>
+<span class="c">%         basis      : Approximated basis of k first eigenvectors</span>
+<span class="c">%         filt_sig   : Filtered random signal</span>
+<span class="c">%         param      : Optional parameters (with new entries)</span>
+<span class="c">%</span>
+<span class="c">%   &#39;gsp_eigenspace_estimation(G,k)&#39; computes an estimation of the first </span>
+<span class="c">%   k eigenvectors of the Laplacian of G using Gaussian random signal</span>
+<span class="c">%   filtering, following the FEARS method described in paratte2017fast.</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   Example:</span>
+<span class="c">%</span>
+<span class="c">%         G = gsp_sensor(256);</span>
+<span class="c">%         k = 8;</span>
+<span class="c">%         param.order = 100;</span>
+<span class="c">%         Uk_est = gsp_eigenspace_estimation(G, k, param);</span>
+<span class="c">%         G = gsp_compute_fourier_basis(G);</span>
+<span class="c">%         proj_energy = norm(Uk_est&#39;  G.U(:, 1:k), &#39;fro&#39;);</span>
+<span class="c">%       </span>
+<span class="c">%</span>
+<span class="c">%   Additional parameters</span>
+<span class="c">%   ---------------------</span>
+<span class="c">%  </span>
+<span class="c">%    param.filter  : Select the filter to be used for the computation. </span>
+<span class="c">%      &#39;lp-ch&#39;   : Chebyshev polynomial approximation</span>
+<span class="c">%      &#39;lp-jch&#39;  : Jackson-Chebyshev polynomial approximation</span>
+<span class="c">%      &#39;expwin&#39;  : Exponentially decreasing polynomial approximation Default: &#39;lp-jch&#39;</span>
+<span class="c">%    param.order : Degree of the polynomial approximation (default=50).</span>
+<span class="c">%    param.lk_est_method : Select the version of lk estimation.</span>
+<span class="c">%      &#39;fast&#39;      : Accelerated method using local uniformity assumption</span>
+<span class="c">%      &#39;std&#39;  : Usual method using dichotomy all the time Default: &#39;fast&#39;</span>
+<span class="c">%    param.R : Random matrix to use (of size N &gt; d, d &gt;= k)</span>
+<span class="c">%     (default: Gaussian(0, 1/k) of size Nxk)</span>
+<span class="c">%    param.pcoef : Polynomial coefficients if already known.</span>
+<span class="c">%    param.lk : Estimated value of lambda_k if already known.</span>
+<span class="c">%    param.verbose : Verbosity level (0 no log - 1 display warnings) (default 1).   </span>
+<span class="c">%</span>
+<span class="c">% </span>
+<span class="c">%   References:</span>
+<span class="c">%     J. Paratte and L. Martin. Fast eigenspace approximation using random</span>
+<span class="c">%     signals. arXiv preprint arXiv:1611.00938, 2016.</span>
+<span class="c">%     </span>
+<span class="c">%     </span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/embedding/gsp_eigenspace_estimation.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+<span class="c">% Author: Johan Paratte, Lionel Martin</span>
+<span class="c">% Date: 3 November 2016</span>
+
+<span class="k">if</span> <span class="n">nargin</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">,</span> <span class="n">param</span> <span class="p">=</span> <span class="n">struct</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;filter&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">filter</span> <span class="p">=</span> <span class="s">&#39;lp-jch&#39;</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;order&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">order</span> <span class="p">=</span> <span class="mi">50</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;lk_est_method&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">lk_est_method</span> <span class="p">=</span> <span class="s">&#39;fast&#39;</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;R&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">R</span> <span class="p">=</span> <span class="nb">randn</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">N</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span><span class="o">/</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">k</span><span class="p">);</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;verbose&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
+
+<span class="n">assert</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">R</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">G</span><span class="p">.</span><span class="n">N</span> <span class="o">&amp;&amp;</span> <span class="nb">size</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">R</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span><span class="p">=</span> <span class="n">k</span><span class="p">,</span> <span class="s">&#39;The optional parameter R has wrong size.&#39;</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;pcoefs&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">disp</span><span class="p">(</span><span class="s">&#39;Polynomial filtering required. Computing polynomial coefficients...&#39;</span><span class="p">);</span> <span class="k">end</span>
+
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="s">&#39;lmax&#39;</span><span class="p">)</span>
+        <span class="n">G</span> <span class="p">=</span> <span class="n">gsp_estimate_lmax</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+        <span class="n">warning</span><span class="p">([</span><span class="s">&#39;GSP_EIGENSPACE_ESTIMATION: The variable lmax is not available.&#39;</span><span class="p">,</span> <span class="c">...</span>
+            <span class="s">&#39;The function will compute it for you. However, if you apply &#39;</span><span class="p">,</span> <span class="c">...</span>
+            <span class="s">&#39;many time this function, you should precompute it using the &#39;</span><span class="p">,</span> <span class="c">...</span>
+            <span class="s">&#39;function: gsp_estimate_lmax.&#39;</span><span class="p">]);</span>
+    <span class="k">end</span>
+
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;lk&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Estimation of lambda_k&#39;</span><span class="p">);</span>
+        <span class="k">end</span>
+
+        <span class="n">tic</span><span class="p">;</span>
+        <span class="k">switch</span> <span class="n">param</span><span class="p">.</span><span class="n">lk_est_method</span>
+            <span class="k">case</span> <span class="s">&#39;fast&#39;</span>
+                <span class="p">[</span><span class="n">param</span><span class="p">.</span><span class="n">lk</span><span class="p">,</span> <span class="n">info</span><span class="p">]</span> <span class="p">=</span> <span class="n">gsp_fast_estimate_lk</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">param</span><span class="p">);</span>
+                <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">disp</span><span class="p">(</span><span class="s">&#39;using our accelerated method.&#39;</span><span class="p">);</span> <span class="k">end</span>
+
+            <span class="k">case</span> <span class="s">&#39;std&#39;</span>
+                <span class="p">[</span><span class="o">~</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">lk</span><span class="p">,</span> <span class="o">~</span><span class="p">,</span> <span class="o">~</span><span class="p">,</span> <span class="n">nb_iter_lk</span><span class="p">,</span> <span class="n">k_est_lk</span><span class="p">]</span> <span class="p">=</span> <span class="n">gsp_estimate_lk</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">param</span><span class="p">);</span>
+                <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">disp</span><span class="p">(</span><span class="s">&#39;using the standard method.&#39;</span><span class="p">);</span> <span class="k">end</span>
+
+            <span class="k">otherwise</span>
+                <span class="n">error</span><span class="p">(</span><span class="s">&#39;Unknown method for lk_est_method.&#39;</span><span class="p">);</span>
+        <span class="k">end</span>
+        <span class="n">t</span> <span class="p">=</span> <span class="n">toc</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span>
+            <span class="n">fprintf</span><span class="p">([</span><span class="s">&#39;* Estimated lk: %d\n&#39;</span><span class="p">,</span> <span class="c">...</span>
+            <span class="s">&#39;* Time to estimate lk: %f sec\n&#39;</span><span class="p">,</span> <span class="c">...</span>
+            <span class="s">&#39;* in %d iterations with k_est=%d (target=%d)\n&#39;</span><span class="p">],</span> <span class="c">...</span>
+            <span class="n">param</span><span class="p">.</span><span class="n">lk</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">mean</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">calls</span><span class="p">),</span> <span class="n">mean</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">k_est</span><span class="p">),</span> <span class="n">k</span><span class="p">);</span>
+        <span class="k">end</span>
+    <span class="k">else</span>
+        <span class="n">warning</span><span class="p">(</span><span class="s">&#39;lambda_k was provided to the method from param.&#39;</span><span class="p">);</span>
+    <span class="k">end</span>
+
+    <span class="n">tic</span><span class="p">;</span>
+    <span class="k">switch</span> <span class="n">param</span><span class="p">.</span><span class="n">filter</span>
+        <span class="k">case</span> <span class="s">&#39;lp-ch&#39;</span>
+            <span class="p">[</span><span class="n">param</span><span class="p">.</span><span class="n">pcoefs</span><span class="p">,</span> <span class="o">~</span><span class="p">]</span> <span class="p">=</span> <span class="n">jackson_cheby_poly_coefficients</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">lk</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">G</span><span class="p">.</span><span class="n">lmax</span><span class="p">],</span> <span class="n">param</span><span class="p">.</span><span class="n">order</span><span class="p">);</span>
+
+        <span class="k">case</span> <span class="s">&#39;lp-jch&#39;</span>
+            <span class="p">[</span><span class="o">~</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">pcoefs</span><span class="p">]</span> <span class="p">=</span> <span class="n">jackson_cheby_poly_coefficients</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">lk</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">G</span><span class="p">.</span><span class="n">lmax</span><span class="p">],</span> <span class="n">param</span><span class="p">.</span><span class="n">order</span><span class="p">);</span>
+
+        <span class="k">case</span> <span class="s">&#39;expwin&#39;</span>
+            <span class="n">ew</span> <span class="p">=</span> <span class="n">gsp_design_expwin</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">lk</span><span class="o">/</span><span class="n">G</span><span class="p">.</span><span class="n">lmax</span><span class="p">);</span>
+            <span class="n">param</span><span class="p">.</span><span class="n">pcoefs</span> <span class="p">=</span> <span class="n">gsp_cheby_coeff</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">ew</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">order</span><span class="p">);</span>
+
+        <span class="k">otherwise</span>
+            <span class="n">error</span><span class="p">(</span><span class="s">&#39;Unknown filter type!&#39;</span><span class="p">);</span>     
+    <span class="k">end</span>
+
+    <span class="n">t</span> <span class="p">=</span> <span class="n">toc</span><span class="p">;</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;* Time to compute polynomial coefficients: %f sec.\n&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">);</span> <span class="k">end</span>
+
+<span class="k">else</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">warning</span><span class="p">(</span><span class="s">&#39;pcoef was provided to the method from param.&#39;</span><span class="p">);</span> <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">disp</span><span class="p">(</span><span class="s">&#39;Filtering random signals...&#39;</span><span class="p">);</span> <span class="k">end</span>
+<span class="n">tic</span><span class="p">;</span>
+<span class="n">filt_sig</span> <span class="p">=</span> <span class="n">gsp_cheby_op</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">pcoefs</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">R</span><span class="p">);</span>
+<span class="n">t</span> <span class="p">=</span> <span class="n">toc</span><span class="p">;</span>
+<span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;* Time to filter random signals: %f sec.\n&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">);</span> <span class="k">end</span>
+
+<span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">disp</span><span class="p">(</span><span class="s">&#39;Computing the SVD for eigenspace recovery...&#39;</span><span class="p">);</span> <span class="k">end</span>
+<span class="n">tic</span><span class="p">;</span>
+<span class="p">[</span><span class="n">basis</span><span class="p">,</span> <span class="o">~</span><span class="p">,</span> <span class="o">~</span><span class="p">]</span> <span class="p">=</span> <span class="n">svd</span><span class="p">(</span><span class="n">filt_sig</span><span class="p">,</span> <span class="s">&#39;econ&#39;</span><span class="p">);</span>
+<span class="n">t</span> <span class="p">=</span> <span class="n">toc</span><span class="p">;</span>
+<span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;* Time to compute SVD: %f sec.\n&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">);</span> <span class="k">end</span>
+
+<span class="k">end</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

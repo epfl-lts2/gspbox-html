@@ -1,0 +1,18 @@
+G = 
+
+  struct with fields:
+
+             W: [1130×1130 double]
+        coords: [1130×2 double]
+          info: [1×1 struct]
+      plotting: [1×1 struct]
+        limits: [0 640 -400 0]
+             A: [1130×1130 logical]
+             N: 1130
+          type: 'unknown'
+      directed: 0
+    hypergraph: 0
+      lap_type: 'combinatorial'
+             L: [1130×1130 double]
+             d: [1130×1 double]
+            Ne: 3131

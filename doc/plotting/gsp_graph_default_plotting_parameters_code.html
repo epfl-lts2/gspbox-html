@@ -1,0 +1,191 @@
+ 
+<!DOCTYPE html PUBLIC "-//W3C//DTD html 4.0//EN">
+<html>
+<head>
+<title>GSP_GRAPH_DEFAULT_PLOTTING_PARAMETERS - Default plotting parameters</title>
+<link rel="stylesheet" href="../include/mat2doc.css" type="text/css">
+<link rel="stylesheet" href="../include/color_text.css" type="text/css">
+<META NAME="keywords" CONTENT=""/> 
+
+<!-- Script to enable latex equations with MathJax -->
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+</head>
+
+<div id="container">
+<div id="header">
+<table style="height:100%; width:100%">
+<tr>
+<td valign="top" width="75%">
+<h1>The title of my toolbox</h1>
+
+<h2>Short description of my toolbox</h2>
+</td>
+<td valign="middle">
+<a href="./index.php"><img src="../include/logo_tr.png" alt="Logo" height="70"></a>
+</td>
+</tr>
+</table> 
+</div>
+<div id="space"></div>
+<div id="main_content">
+<table width="100%">
+<tr>
+<td valign="top" width="20%">
+<div id="menu">
+<div id="menutitle"><a href="gsp_graph_default_plotting_parameters.html">View the help</a></div>
+
+
+<div id="menutitle">Graph</div>
+<ul>
+<li><a href="gsp_plot_graph.html">gsp_plot_graph</a></li>
+<li><a href="gsp_plot_signal.html">gsp_plot_signal</a></li>
+</ul>
+<div id="menutitle">Other</div>
+<ul>
+<li><a href="gsp_plot_signal_spectral.html">gsp_plot_signal_spectral</a></li>
+<li><a href="gsp_plot_sgram.html">gsp_plot_sgram</a></li>
+<li><a href="gsp_plot_filter.html">gsp_plot_filter</a></li>
+<li><a href="gsp_graph_default_plotting_parameters.html">gsp_graph_default_plotting_parameters</a></li>
+</ul>
+
+
+</div>
+</td>
+<td valign="top"  width="80%">
+
+
+
+<div id="content">
+
+<h1 class="title">GSP_GRAPH_DEFAULT_PLOTTING_PARAMETERS - Default plotting parameters</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span class="k">function</span><span class="w"> </span>G <span class="p">=</span><span class="w"> </span><span class="nf">gsp_graph_default_plotting_parameters</span><span class="p">(</span>G<span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_GRAPH_DEFAULT_PLOTTING_PARAMETERS Default plotting parameters</span>
+<span class="c">%   Usage: G = gsp_graph_default_plotting_parameters( G );</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters</span>
+<span class="c">%       G   : Graph </span>
+<span class="c">%   Output parameters</span>
+<span class="c">%       G   : Graph</span>
+<span class="c">% </span>
+<span class="c">%   This function complete all plotting parameter for a graph.</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   List of plotting parameters</span>
+<span class="c">%   ---------------------------</span>
+<span class="c">%</span>
+<span class="c">%   </span>
+<span class="c">%   G.plotting*: Plotting parameters</span>
+<span class="c">%    G.plotting.edge_width*: Width of edges (default 1)</span>
+<span class="c">%    G.plotting.edge_color*: Color of edges (default [255,88,41]/255 )</span>
+<span class="c">%    G.plotting.edge_style*: Style of edges (default &#39;-&#39;)</span>
+<span class="c">%    G.plotting.vertex_size*: Size of vertex (default 50)</span>
+<span class="c">%    G.plotting.vertex_color*: Color of vertex (default &#39;b&#39;)</span>
+<span class="c">%   </span>
+<span class="c">%          </span>
+<span class="c">%</span>
+<span class="c">%   Url: http://gspbox.sourceforge.net/doc/plotting/gsp_graph_default_plotting_parameters.php</span>
+
+<span class="c">% Copyright (C) 2013-2014 Nathanael Perraudin, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.2.0</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% Author: Nathanael Perraudin</span>
+<span class="c">% Date  : 13.08.2014</span>
+
+<span class="k">if</span> <span class="n">nargin</span><span class="o">&lt;</span><span class="mi">1</span>
+    <span class="n">error</span><span class="p">(</span><span class="s">&#39;You need a graph to run this function!&#39;</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c">% Assign default plotting parameters</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;plotting&#39;</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">=</span><span class="n">struct</span><span class="p">;</span> 
+<span class="k">end</span>
+
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">,</span><span class="s">&#39;edge_width&#39;</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">edge_width</span><span class="p">=</span><span class="mi">1</span><span class="p">;</span> 
+<span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">,</span><span class="s">&#39;edge_color&#39;</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">edge_color</span><span class="p">=[</span><span class="mi">255</span><span class="p">,</span><span class="mi">88</span><span class="p">,</span><span class="mi">41</span><span class="p">]</span><span class="o">/</span><span class="mi">255</span><span class="p">;</span>
+<span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">,</span><span class="s">&#39;edge_style&#39;</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">edge_style</span><span class="p">=</span><span class="s">&#39;-&#39;</span><span class="p">;</span>
+<span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">,</span><span class="s">&#39;vertex_size&#39;</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">vertex_size</span><span class="p">=</span><span class="mi">50</span><span class="p">;</span>
+<span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">,</span><span class="s">&#39;vertex_color&#39;</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">vertex_color</span><span class="p">=</span><span class="s">&#39;b&#39;</span><span class="p">;</span>
+<span class="k">end</span>
+<span class="c">% if ~isfield(G,&#39;vertex_edge_color&#39;)</span>
+<span class="c">%     G.plotting.vertex_edge_color=&#39;k&#39;;</span>
+<span class="c">% end</span>
+
+
+<span class="c">% Limit for plotting</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">,</span><span class="s">&#39;limits&#39;</span><span class="p">),</span> 
+    <span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;coords&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">size</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span>
+            <span class="n">mrx</span> <span class="p">=</span>  <span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">)))</span><span class="o">/</span><span class="mi">20</span><span class="o">+</span><span class="nb">eps</span><span class="p">;</span>
+            <span class="n">mry</span> <span class="p">=</span>  <span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">)))</span><span class="o">/</span><span class="mi">20</span><span class="o">+</span><span class="nb">eps</span><span class="p">;</span>
+            <span class="n">mrz</span> <span class="p">=</span>  <span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">3</span><span class="p">))</span> <span class="o">-</span> <span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">3</span><span class="p">)))</span><span class="o">/</span><span class="mi">20</span><span class="o">+</span><span class="nb">eps</span><span class="p">;</span>
+            <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">limits</span> <span class="p">=</span> <span class="p">[</span><span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="n">mrx</span><span class="p">,</span><span class="c">...</span>
+                <span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">))</span><span class="o">+</span><span class="n">mrx</span><span class="p">,</span> <span class="c">...</span>
+                <span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">))</span><span class="o">-</span><span class="n">mry</span><span class="p">,</span> <span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="n">mry</span><span class="p">,</span> <span class="c">... </span>
+                <span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">3</span><span class="p">))</span><span class="o">-</span><span class="n">mrz</span><span class="p">,</span> <span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">3</span><span class="p">))</span><span class="o">+</span><span class="n">mrz</span><span class="p">];</span> 
+        <span class="k">elseif</span> <span class="nb">size</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span>
+            <span class="n">mrx</span> <span class="p">=</span>  <span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">)))</span><span class="o">/</span><span class="mi">20</span><span class="o">+</span><span class="nb">eps</span><span class="p">;</span>
+            <span class="n">mry</span> <span class="p">=</span>  <span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">)))</span><span class="o">/</span><span class="mi">20</span><span class="o">+</span><span class="nb">eps</span><span class="p">;</span>
+            <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">limits</span> <span class="p">=</span> <span class="p">[</span><span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="n">mrx</span><span class="p">,</span><span class="c">...</span>
+                <span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">))</span><span class="o">+</span><span class="n">mrx</span><span class="p">,</span> <span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">))</span><span class="o">-</span><span class="n">mry</span><span class="p">,</span><span class="c">...</span>
+                <span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="n">mry</span><span class="p">];</span> 
+        <span class="k">else</span>
+            <span class="n">mrx</span> <span class="p">=</span>  <span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">))</span><span class="o">/</span><span class="mi">20</span><span class="p">;</span>
+            <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">limits</span> <span class="p">=</span> <span class="p">[</span><span class="n">min</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">)</span><span class="o">-</span><span class="n">mrx</span><span class="p">,</span> <span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">)</span><span class="o">+</span><span class="n">mrx</span><span class="p">];</span> 
+        <span class="k">end</span>
+            
+    <span class="k">else</span>
+        <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">limits</span> <span class="p">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">];</span> 
+    <span class="k">end</span>
+<span class="k">end</span>
+
+
+<span class="k">end</span>
+</pre></div>
+
+
+
+</div>
+
+
+</td>
+</tr>
+</table>
+</div>
+<div id="space"></div>
+<div id="footer">
+Designed by: Nathanael Perraudin, David Shuman, Johan Paratte
+</div>
+</div>
+
+</body>
+</html>
+
+
+

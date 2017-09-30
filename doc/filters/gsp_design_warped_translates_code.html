@@ -1,0 +1,384 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_DESIGN_WARPED_TRANSLATES - Create a vertex frequency filterbank</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_design_warped_translates.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p></p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_DESIGN_WARPED_TRANSLATES - Create a vertex frequency filterbank</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span>[ g, wf ] <span class="p">=</span><span class="w"> </span><span class="nf">gsp_design_warped_translates</span><span class="p">(</span> G, Nf, param <span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_DESIGN_WARPED_TRANSLATES Create a vertex frequency filterbank</span>
+<span class="c">%   Usage: g = gsp_design_warped_translates( G, Nf );</span>
+<span class="c">%          g = gsp_design_warped_translates( G, Nf, param );</span>
+<span class="c">%   </span>
+<span class="c">%   Inputs parameters:</span>
+<span class="c">%       G       : Graph structure (or lmax for &#39;log&#39; and &#39;log_plus&#39; only) </span>
+<span class="c">%       Nf      : Number of filter </span>
+<span class="c">%       param   : Structure of optional parameters</span>
+<span class="c">%</span>
+<span class="c">%   Outputs parameters:</span>
+<span class="c">%       g       : filterbanks</span>
+<span class="c">%       wf      : warped function</span>
+<span class="c">%</span>
+<span class="c">%   This function designs filters that are warped versions of the uniform</span>
+<span class="c">%   half cosine translates described above.</span>
+<span class="c">%</span>
+<span class="c">%   This function will compute the maximum eigenvalue of the laplacian. To</span>
+<span class="c">%   be more efficient, you can precompute it using:</span>
+<span class="c">%</span>
+<span class="c">%       G = gsp_estimate_lmax(G);</span>
+<span class="c">%</span>
+<span class="c">%   Example:</span>
+<span class="c">%</span>
+<span class="c">%             figure();</span>
+<span class="c">%             Nf = 10;</span>
+<span class="c">%             G = gsp_sensor(100);</span>
+<span class="c">%             G = gsp_estimate_lmax(G);</span>
+<span class="c">%             G = gsp_spectrum_cdf_approx(G);</span>
+<span class="c">%             g = gsp_design_warped_translates(G, Nf);   </span>
+<span class="c">%             gsp_plot_filter(G,g);</span>
+<span class="c">%             [A,B] = gsp_filterbank_bounds(G,g)</span>
+<span class="c">%</span>
+<span class="c">%   param is an optional structure containing the following fields</span>
+<span class="c">%</span>
+<span class="c">%    param.verbose*: verbosity level. 0 no log - 1 display warnings.</span>
+<span class="c">%     (default 1) </span>
+<span class="c">%    param.warping_type*: Create a warping function according two</span>
+<span class="c">%     different methods (default &#39;spectrum_approximation&#39;). Please read</span>
+<span class="c">%     below for more information about this parameter.</span>
+<span class="c">%    param.log*: On top of the other warping add a log function. An</span>
+<span class="c">%     alternative way to construct spectral graph wavelets. These are</span>
+<span class="c">%     adapted to the specific spectrum, not just the length of </span>
+<span class="c">%     the spectrum. The final warping function will be:</span>
+<span class="c">%     </span>
+<span class="c">%           log(f(x))</span>
+<span class="c">%</span>
+<span class="c">%     where the function f(x) is defined by the attribute</span>
+<span class="c">%     param.warping_type.</span>
+<span class="c">%     Warning: Additional required inputs: param.warp_function.</span>
+<span class="c">%    param.warp_function*: To provide a special warping function. This</span>
+<span class="c">%     parameter is used when param.warping_type is &#39;custom&#39;.</span>
+<span class="c">%    param.interpolation_type*: select the interpolation type for the</span>
+<span class="c">%     spectrum samples. You can choose &#39;pwl&#39; (piece wise linear)</span>
+<span class="c">%     or &#39;monocubic&#39;. This attribute is used only when param.warping_type </span>
+<span class="c">%     is &#39;spectrum_interpolation&#39;. (default &#39;monocubic&#39;)</span>
+<span class="c">%    param.filter*: select the initial uniform filterbank &#39;half_cosine&#39;</span>
+<span class="c">%     or &#39;itersine&#39;. See gsp_design_half_cosine and</span>
+<span class="c">%     gsp_design_itersine for more information about those filterbank.</span>
+<span class="c">%     If you want to use your personal filter, just put it there. For</span>
+<span class="c">%     instance:</span>
+<span class="c">%               </span>
+<span class="c">%               param.filter = gsp_design_abspline(G,Nf);</span>
+<span class="c">%</span>
+<span class="c">%     (Default &#39;half_cosine&#39;)</span>
+<span class="c">%</span>
+<span class="c">%    param.overlap*: overlap of the initial filter. Works only</span>
+<span class="c">%     with param.filter set to &#39;itersine&#39;. For tight frame, input an even</span>
+<span class="c">%     number (default 2).</span>
+<span class="c">%   </span>
+<span class="c">%</span>
+<span class="c">%   Warping methods</span>
+<span class="c">%   ---------------</span>
+<span class="c">%</span>
+<span class="c">%   The different warping type available in param.warping_type are:</span>
+<span class="c">%</span>
+<span class="c">%    &#39;spectrum_interpolation&#39;: Warping functions based on spectrum</span>
+<span class="c">%     samples. From the samples, an approximation of the spectrum cdf is</span>
+<span class="c">%     obtained by interpolation. Then this function is used for the</span>
+<span class="c">%     warping. (i.e., like the filter banks [1] in Section 2, these are</span>
+<span class="c">%     spectrum-adapted filter banks).</span>
+<span class="c">%     </span>
+<span class="c">%     If you use this method you need to specify the input</span>
+<span class="c">%     param.approx_spectrum that contains two fields:</span>
+<span class="c">%     param.approx_spectrum.x and param.approx_spectrum.y that are the</span>
+<span class="c">%     the point of the cumulative density distribution.</span>
+<span class="c">%</span>
+<span class="c">%    &#39;spectrum_approximation&#39;: This function will compute an approximation</span>
+<span class="c">%     of the cumulative density function of the graph Laplacian</span>
+<span class="c">%     eigenvalues and use it as warping function. If you want to use the</span>
+<span class="c">%     cdf later, you should precompute it using:</span>
+<span class="c">%</span>
+<span class="c">%       G = gsp_spectrum_cdf_approx(G);</span>
+<span class="c">%   </span>
+<span class="c">%    &#39;custom&#39;: The user provide the warping function in the parameter:</span>
+<span class="c">%     param.warp_function.</span>
+<span class="c">%</span>
+<span class="c">%   References:</span>
+<span class="c">%     D. I. Shuman, C. Wiesmeyr, N. Holighaus, and P. Vandergheynst.</span>
+<span class="c">%     Spectrum-adapted tight graph wavelet and vertex-frequency frames. arXiv</span>
+<span class="c">%     preprint arXiv:1311.0897, 2013.</span>
+<span class="c">%     </span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/filters/gsp_design_warped_translates.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+<span class="c">% Author: Nathanael Perraudin, David Shuman</span>
+<span class="c">% Date  : 18 June 2014</span>
+<span class="c">% Testing: test_filter</span>
+
+<span class="c">% TODO: check the log case!</span>
+
+<span class="k">if</span> <span class="n">nargin</span> <span class="o">&lt;</span> <span class="mi">3</span>
+    <span class="n">param</span> <span class="p">=</span> <span class="n">struct</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;verbose&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span><span class="p">;</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;warping_type&#39;</span><span class="p">)</span>
+    <span class="n">param</span><span class="p">.</span><span class="n">warping_type</span> <span class="p">=</span> <span class="s">&#39;spectrum_approximation&#39;</span><span class="p">;</span> 
+<span class="k">end</span><span class="p">;</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;log&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="nb">log</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> <span class="k">end</span><span class="p">;</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;filter&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">filter</span> <span class="p">=</span> <span class="s">&#39;half_cosine&#39;</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;overlap&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">overlap</span> <span class="p">=</span> <span class="mi">2</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;logmax&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">logmax</span> <span class="p">=</span> <span class="mi">10</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;interpolation_type&#39;</span><span class="p">)</span>
+    <span class="n">param</span><span class="p">.</span><span class="n">interpolation_type</span> <span class="p">=</span> <span class="s">&#39;monocubic&#39;</span><span class="p">;</span>
+<span class="k">end</span>
+
+
+
+
+
+<span class="k">if</span> <span class="n">isstruct</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;lmax&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span>
+            <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;GSP_DESIGN_WARPED_TRANSLATES: has to compute lmax \n&#39;</span><span class="p">)</span>
+        <span class="k">end</span>
+        <span class="n">G</span> <span class="p">=</span> <span class="n">gsp_estimate_lmax</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+    <span class="k">end</span>
+   <span class="n">lmax</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">lmax</span><span class="p">;</span>
+<span class="k">else</span>
+   <span class="n">lmax</span> <span class="p">=</span> <span class="n">G</span><span class="p">;</span>
+<span class="k">end</span>
+
+
+
+
+
+
+
+<span class="k">switch</span> <span class="n">param</span><span class="p">.</span><span class="n">warping_type</span>
+
+
+    <span class="k">case</span> <span class="s">&#39;spectrum_interpolation&#39;</span>
+        
+        <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;approx_spectrum&#39;</span><span class="p">)</span>
+        	<span class="n">error</span><span class="p">(</span><span class="s">&#39;GSP_DESIGN_WARPED_TRANSLATES: Approximate spectrum is not specified&#39;</span><span class="p">)</span>
+        <span class="k">end</span>
+    
+        <span class="k">switch</span> <span class="n">param</span><span class="p">.</span><span class="n">interpolation_type</span>
+        
+            <span class="k">case</span> <span class="s">&#39;pwl&#39;</span>
+               <span class="c">% error(&#39;To be debugged!&#39;)</span>
+                <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;warp_start_one&#39;</span><span class="p">)</span> <span class="c">% DIS: Get rid of two cases - just include in interpolation points</span>
+                    <span class="n">warp_start_one</span><span class="p">=</span><span class="mi">0</span><span class="p">;</span>
+                <span class="k">else</span>
+                    <span class="n">warp_start_one</span><span class="p">=</span><span class="n">param</span><span class="p">.</span><span class="n">warp_start_one</span><span class="p">;</span>
+                <span class="k">end</span>
+
+                <span class="c">% Generate uniform translates covering [0,upper_bound_translates] % DIS: Get rid of two cases - just include in interpolation points</span>
+                <span class="k">if</span> <span class="n">warp_start_one</span>
+                    <span class="n">wf</span> <span class="p">=</span> <span class="p">@(</span><span class="n">s</span><span class="p">)</span> <span class="n">gsp_pwl_warp_fn</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">approx_spectrum</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="n">param</span><span class="p">.</span><span class="n">approx_spectrum</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="n">s</span><span class="p">);</span>
+                   <span class="c">% upper_bound_translates=max(param.approx_spectrum.y);</span>
+                <span class="k">else</span>
+                    <span class="n">wf</span> <span class="p">=</span> <span class="p">@(</span><span class="n">s</span><span class="p">)</span> <span class="n">gsp_pwl_warp_fn</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">approx_spectrum</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="n">param</span><span class="p">.</span><span class="n">approx_spectrum</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="n">s</span><span class="p">);</span>
+                   <span class="c">% upper_bound_translates=max(param.approx_spectrum.y)-1;</span>
+                <span class="k">end</span>
+            <span class="k">case</span> <span class="s">&#39;monocubic&#39;</span>
+
+                <span class="c">% Generate uniform translates covering [0,upper_bound_translates]</span>
+                <span class="n">wf</span> <span class="p">=</span> <span class="p">@(</span><span class="n">s</span><span class="p">)</span> <span class="n">gsp_mono_cubic_warp_fn</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">approx_spectrum</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="n">param</span><span class="p">.</span><span class="n">approx_spectrum</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="n">s</span><span class="p">);</span>
+            <span class="k">otherwise</span>
+            
+            <span class="n">error</span><span class="p">(</span><span class="s">&#39;GSP_DESIGN_WARPED_TRANSLATES: Unknown interpolation type&#39;</span><span class="p">)</span>
+        <span class="k">end</span>
+            
+    
+    
+
+        
+    <span class="k">case</span> <span class="s">&#39;spectrum_approximation&#39;</span>
+         <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;spectrum_cdf_approx&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span>
+                <span class="n">fprintf</span><span class="p">([</span><span class="s">&#39;GSP_DESIGN_WARPED_TRANSLATES: has to compute&#39;</span><span class="p">,</span><span class="c">...</span>
+                    <span class="s">&#39; the spectrum continuous density function &#39;</span><span class="p">,</span><span class="c">...</span>
+                    <span class="s">&#39;approximation \n&#39;</span><span class="p">]);</span>
+            <span class="k">end</span>
+            <span class="n">G</span> <span class="p">=</span> <span class="n">gsp_spectrum_cdf_approx</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+         <span class="k">end</span>
+        <span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;warp_function&#39;</span><span class="p">)</span>
+            <span class="n">error</span><span class="p">(</span><span class="s">&#39;GSP_DESIGN_WARPED_TRANSLATES: Custom warp function is defined but not used&#39;</span><span class="p">)</span>
+        <span class="k">else</span>
+            <span class="n">wf</span><span class="p">=</span><span class="n">G</span><span class="p">.</span><span class="n">spectrum_cdf_approx</span><span class="p">;</span>
+        <span class="k">end</span>
+
+<span class="c">%         if ~isfield(param,&#39;upper_bound_translates&#39;)</span>
+<span class="c">%             param.upper_bound_translates=wf(lmax);</span>
+<span class="c">%             %error(&#39;Upper bound of the uniform translates is not specified&#39;)</span>
+<span class="c">%         end</span>
+
+    <span class="c">%%%%%%%%%%%%%%%%%</span>
+    <span class="c">% Other user-specified warping function</span>
+    <span class="k">case</span> <span class="s">&#39;custom&#39;</span>
+
+
+        <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;warp_function&#39;</span><span class="p">)</span>
+            <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;GSP_DESIGN_WARPED_TRANSLATES: Custom warp function is not specified (Taking a uniform warping)\n&#39;</span><span class="p">)</span>
+            <span class="n">wf</span> <span class="p">=</span> <span class="p">@(</span><span class="n">x</span><span class="p">)</span> <span class="n">x</span><span class="p">;</span>
+        <span class="k">else</span>
+            <span class="n">wf</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">warp_function</span><span class="p">;</span>
+        <span class="k">end</span>
+
+<span class="c">%         if ~isfield(param,&#39;upper_bound_translates&#39;)</span>
+<span class="c">%             param.upper_bound_translates=wf(lmax);</span>
+<span class="c">%             %error(&#39;Upper bound of the uniform translates is not specified&#39;)</span>
+<span class="c">%         end</span>
+
+    <span class="k">otherwise</span>
+        <span class="n">error</span><span class="p">(</span><span class="s">&#39;GSP_DESIGN_WARPED_TRANSLATES: Warp function type not recognized&#39;</span><span class="p">)</span>
+<span class="k">end</span>
+
+
+
+<span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="nb">log</span>
+    <span class="n">xmax</span> <span class="p">=</span> <span class="n">wf</span><span class="p">(</span><span class="n">lmax</span><span class="p">);</span>
+    <span class="n">wflog</span> <span class="p">=</span> <span class="p">@(</span><span class="n">s</span><span class="p">)</span> <span class="nb">log</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">wf</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">/</span><span class="n">xmax</span><span class="o">*</span><span class="n">lmax</span><span class="o">*</span><span class="n">param</span><span class="p">.</span><span class="n">logmax</span><span class="o">+</span><span class="nb">eps</span><span class="p">);</span>
+    <span class="n">wf</span> <span class="p">=</span> <span class="n">wflog</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="c">% Old way of doing the log...</span>
+<span class="c">%     % Generate (num_filters-1) uniform translates covering [0,log(lmax)] </span>
+<span class="c">%     switch param.filter</span>
+<span class="c">%         case &#39;half_cosine&#39;</span>
+<span class="c">%             uniform_filters = gsp_design_half_cosine(wflog(lmax),Nf-1);</span>
+<span class="c">%         case &#39;itersine&#39;</span>
+<span class="c">%             paramt.overlap = param.overlap;</span>
+<span class="c">%             uniform_filters = gsp_design_itersine(wflog(lmax),Nf-1,paramt);</span>
+<span class="c">%         otherwise</span>
+<span class="c">%             error(&#39;GSP_DESIGN_WARPED_TRANSLATES: Unknown base filter&#39;)</span>
+<span class="c">%     end</span>
+<span class="c">% </span>
+<span class="c">%     % Warp the uniform translates by log to generate the &quot;wavelet&quot; filters</span>
+<span class="c">%     wavelet_filters=cell(Nf-1,1);</span>
+<span class="c">%     for i=1:Nf-1</span>
+<span class="c">%         wavelet_filters{i} = @(x) uniform_filters{i}(wflog(x)); </span>
+<span class="c">%     end</span>
+<span class="c">% %     g=cell(Nf,1);</span>
+<span class="c">% %     g(2:Nf)=wavelet_filters;</span>
+<span class="c">% %     % Generate a &quot;scaling&quot; filter that results in a tight frame</span>
+<span class="c">% %     g{1}= gsp_tighten_filter(lmax, wavelet_filters );</span>
+<span class="c">%     g{2:end} = wavelet_filters;</span>
+<span class="c">% else</span>
+        
+
+
+    <span class="c">% Generate uniform translates covering [0,param.upper_bound_translates]</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">iscell</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">filter</span><span class="p">)</span>
+        <span class="k">switch</span> <span class="n">param</span><span class="p">.</span><span class="n">filter</span>
+            <span class="k">case</span> <span class="s">&#39;half_cosine&#39;</span>
+                <span class="n">uniform_filters</span> <span class="p">=</span> <span class="n">gsp_design_half_cosine</span><span class="p">(</span><span class="n">wf</span><span class="p">(</span><span class="n">lmax</span><span class="p">),</span><span class="n">Nf</span><span class="p">);</span>
+            <span class="k">case</span> <span class="s">&#39;itersine&#39;</span>
+                <span class="n">paramt</span><span class="p">.</span><span class="n">overlap</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">overlap</span><span class="p">;</span>
+                <span class="n">uniform_filters</span> <span class="p">=</span> <span class="n">gsp_design_itersine</span><span class="p">(</span><span class="n">wf</span><span class="p">(</span><span class="n">lmax</span><span class="p">),</span><span class="n">Nf</span><span class="p">,</span><span class="n">paramt</span><span class="p">);</span>
+            <span class="k">otherwise</span>
+                <span class="n">error</span><span class="p">(</span><span class="s">&#39;GSP_DESIGN_WARPED_TRANSLATES: Unknown base filter&#39;</span><span class="p">)</span>
+        <span class="k">end</span>
+    <span class="k">else</span>
+        <span class="n">uniform_filters</span> <span class="p">=</span> <span class="n">cell</span><span class="p">(</span><span class="n">Nf</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="p">=</span> <span class="mi">1</span><span class="p">:</span><span class="n">Nf</span>
+            <span class="n">uniform_filters</span><span class="p">{</span><span class="n">ii</span><span class="p">}</span> <span class="p">=</span> <span class="p">@(</span><span class="n">x</span><span class="p">)</span> <span class="n">param</span><span class="p">.</span><span class="n">filter</span><span class="p">{</span><span class="n">ii</span><span class="p">}(</span><span class="n">x</span><span class="o">*</span><span class="n">lmax</span><span class="o">/</span><span class="n">wf</span><span class="p">(</span><span class="n">lmax</span><span class="p">));</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+    
+    <span class="n">g</span><span class="p">=</span><span class="n">cell</span><span class="p">(</span><span class="n">Nf</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+    <span class="c">% Generate custom warped filters (may be adapated to the specific spectrum via the custom warp function)</span>
+    <span class="k">for</span> <span class="nb">i</span><span class="p">=</span><span class="mi">1</span><span class="p">:</span><span class="n">Nf</span>
+        <span class="n">g</span><span class="p">{</span><span class="nb">i</span><span class="p">}</span> <span class="p">=</span> <span class="p">@(</span><span class="n">x</span><span class="p">)</span> <span class="n">uniform_filters</span><span class="p">{</span><span class="nb">i</span><span class="p">}(</span><span class="n">wf</span><span class="p">(</span><span class="n">x</span><span class="p">));</span> 
+    <span class="k">end</span>
+    
+<span class="c">% end</span>
+
+
+<span class="k">end</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,130 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_DESIGN_ITERSINE - Create a itersine filterbanks</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_design_itersine_code.html">View the code</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p></p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_DESIGN_ITERSINE - Create a itersine filterbanks</h1>
+
+<div class="section" id="usage">
+<h2>Usage</h2>
+<pre class="literal-block">
+g = gsp_design_itersine( G, Nf );
+g = gsp_design_itersine( G, Nf, param );
+</pre>
+</div>
+<div class="section" id="xxxdescription">
+<h2>Description</h2>
+<dl class="docutils">
+<dt>Inputs parameters:</dt>
+<dd>G       : Graph structure or lmax
+Nf      : Number of filter
+param   : Structure of optional parameters</dd>
+<dt>Outputs parameters:</dt>
+<dd>g       : filterbanks
+mu      : centers of the filters</dd>
+</dl>
+<p>This function creates an itersine half overlap filterbank of <em>Nf</em> filters
+Going from <span class="math">\(0\)</span> to <span class="math">\(\lambda_{max}\)</span></p>
+<p>This filterbank is tight for an overlap of 2 and other particular
+values. The function normalizes the window such that the framebound is
+1.</p>
+<p>The itersine window between -0.5 and 0.5 is defined as</p>
+<!-- g(t) = sin( 0.5 pi (cos pi t)^2 ) -->
+<div class="math">
+\begin{equation*}
+g(t) = \sin \left( 0.5 \pi \cos (\pi t)^2 \right)
+\end{equation*}
+</div>
+<p>This function will compute the maximum eigenvalue of the laplacian. To
+be more efficient, you can precompute it using:</p>
+<pre class="literal-block">
+G = gsp_estimate_lmax(G);
+</pre>
+<p>Example:</p>
+<pre class="literal-block">
+Nf = 20;
+G = gsp_sensor(100);
+G = gsp_estimate_lmax(G);
+g = gsp_design_itersine(G, Nf);
+gsp_plot_filter(G,g);
+[A,B] = gsp_filterbank_bounds(G,g)
+</pre>
+<p><em>This code produces the following output</em>:</p>
+<pre class="literal-block">
+A =
+
+    1.0000
+
+
+B =
+
+    1.0000
+</pre>
+<img alt="gsp_design_itersine_1_1.png" class="align-center" src="gsp_design_itersine_1_1.png" />
+<p><em>param</em> is an optional structure containing the following fields</p>
+<ul class="simple">
+<li><em>param.verbose</em>: verbosity level. 0 no log - 1 display warnings.
+(default 1)</li>
+<li><em>param.overlap</em>: Overlap : default 2</li>
+</ul>
+</div>
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

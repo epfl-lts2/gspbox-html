@@ -1,0 +1,193 @@
+ 
+<!DOCTYPE html PUBLIC "-//W3C//DTD html 4.0//EN">
+<html>
+<head>
+<title>GSP_RESISTANCE_DISTANCE - : Compute the resitance distances of a graph</title>
+<link rel="stylesheet" href="../include/mat2doc.css" type="text/css">
+<link rel="stylesheet" href="../include/color_text.css" type="text/css">
+<META NAME="keywords" CONTENT=""/> 
+
+<!-- Script to enable latex equations with MathJax -->
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+</head>
+
+<div id="container">
+<div id="header">
+<table style="height:100%; width:100%">
+<tr>
+<td valign="top" width="75%">
+<h1>The title of my toolbox</h1>
+
+<h2>Short description of my toolbox</h2>
+</td>
+<td valign="middle">
+<a href="./index.php"><img src="../include/logo_tr.png" alt="Logo" height="70"></a>
+</td>
+</tr>
+</table> 
+</div>
+<div id="space"></div>
+<div id="main_content">
+<table width="100%">
+<tr>
+<td valign="top" width="20%">
+<div id="menu">
+<div id="menutitle"><a href="gsp_resistance_distance.html">View the help</a></div>
+
+
+<div id="menutitle">Connectivity</div>
+<ul>
+<li><a href="gsp_check_connectivity.html">gsp_check_connectivity</a></li>
+<li><a href="gsp_check_connectivity_undirected.html">gsp_check_connectivity_undirected</a></li>
+</ul>
+<div id="menutitle">Norms</div>
+<ul>
+<li><a href="gsp_norm_tv.html">gsp_norm_tv</a></li>
+<li><a href="gsp_norm_tik.html">gsp_norm_tik</a></li>
+<li><a href="gsp_norm_l1_filterbank.html">gsp_norm_l1_filterbank</a></li>
+<li><a href="gsp_norm_l2_filterbank.html">gsp_norm_l2_filterbank</a></li>
+</ul>
+<div id="menutitle">Distance</div>
+<ul>
+<li><a href="gsp_resistance_distance.html">gsp_resistance_distance</a></li>
+<li><a href="gsp_distanz.html">gsp_distanz</a></li>
+</ul>
+<div id="menutitle">Chebysheff</div>
+<ul>
+<li><a href="gsp_cheby_coeff.html">gsp_cheby_coeff</a></li>
+<li><a href="gsp_cheby_op.html">gsp_cheby_op</a></li>
+</ul>
+<div id="menutitle">Others</div>
+<ul>
+<li><a href="gsp_graph_sparsify.html">gsp_graph_sparsify</a></li>
+<li><a href="gsp_repmatline.html">gsp_repmatline</a></li>
+<li><a href="gsp_classic2graph_eig_order.html">gsp_classic2graph_eig_order</a></li>
+<li><a href="gsp_reset_seed.html">gsp_reset_seed</a></li>
+<li><a href="gsp_plotfig.html">gsp_plotfig</a></li>
+<li><a href="gsp_isdirected.html">gsp_isdirected</a></li>
+</ul>
+
+
+</div>
+</td>
+<td valign="top"  width="80%">
+
+
+
+<div id="content">
+
+<h1 class="title">GSP_RESISTANCE_DISTANCE - : Compute the resitance distances of a graph</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span class="k">function</span><span class="w"> </span>rd <span class="p">=</span><span class="w"> </span><span class="nf">gsp_resistance_distance</span><span class="p">(</span>G,param<span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_RESISTANCE_DISTANCE : Compute the resitance distances of a graph</span>
+<span class="c">%   Usage: rd = gsp_resistance_distance(G);</span>
+<span class="c">%          rd = gsp_resistance_distance(L);</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters:</span>
+<span class="c">%       G    : Graph structure or Laplacian matrix (L)</span>
+<span class="c">%       param: optional parameters</span>
+<span class="c">%   Output parameters:</span>
+<span class="c">%       rd   : distance matrix</span>
+<span class="c">%</span>
+<span class="c">%   This function compute the resistance distance of a graph. The distance</span>
+<span class="c">%   between two nodes is defined as the inverse of the weight matrix. For</span>
+<span class="c">%   example the distance matrix::</span>
+<span class="c">%</span>
+<span class="c">%           dist = [0, 3, 1;...</span>
+<span class="c">%                   3, 0, 2;...</span>
+<span class="c">%                   1, 2, 0];</span>
+<span class="c">%</span>
+<span class="c">%   Correspond to the weight matrix::</span>
+<span class="c">%</span>
+<span class="c">%           W = [0, 1/3, 1/1;...</span>
+<span class="c">%                1/3, 0, 1/2;...</span>
+<span class="c">%                1/1, 1/2, 0];</span>
+<span class="c">%</span>
+<span class="c">%   The function will compute the resistance distance following the</span>
+<span class="c">%   Kirshoff&#39;s law. In the our example it is::</span>
+<span class="c">%</span>
+<span class="c">%           rd2 = [0, 3/2, 5/6;...</span>
+<span class="c">%                  3/2, 0, 4/3;...</span>
+<span class="c">%                  5/6, 4/3, 0]</span>
+<span class="c">%</span>
+<span class="c">%   In matlab, you can reprocude this example using:::</span>
+<span class="c">%</span>
+<span class="c">%           % The weigh </span>
+<span class="c">%           dist = [0, 3, 1;...</span>
+<span class="c">%                   3, 0, 2;...</span>
+<span class="c">%                   1, 2, 0];</span>
+<span class="c">%           % The weight is the inverse of the distance...</span>
+<span class="c">%           W = dist.^(-1);</span>
+<span class="c">%           % Fix the diagonal</span>
+<span class="c">%           W([1,5,9])=0;    </span>
+<span class="c">%           G = gsp_graph(W);</span>
+<span class="c">%           rd = gsp_resistance_distance(G)</span>
+<span class="c">%           % Resitance computed by hand</span>
+<span class="c">%           rd2 = [0, 3/2, 5/6;...</span>
+<span class="c">%                  3/2, 0, 4/3;...</span>
+<span class="c">%                  5/6, 4/3, 0]</span>
+<span class="c">%</span>
+<span class="c">%   *param* is an optional structure that contains the following field</span>
+<span class="c">%</span>
+<span class="c">%   * *param.verbose*: display parameter - 0 no log - 1 display warnings</span>
+<span class="c">%     (default 1)</span>
+<span class="c">%   </span>
+<span class="c">%   References: klein1993resistance</span>
+
+<span class="c">% Author: Nathanael Perraudin</span>
+
+<span class="k">if</span> <span class="n">nargin</span> <span class="o">&lt;</span> <span class="mi">2</span>
+    <span class="n">param</span> <span class="p">=</span> <span class="n">struct</span><span class="p">;</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;verbose&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="k">if</span> <span class="n">isstruct</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="c">% Use the non normalized laplacian</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">strcmp</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">lap_type</span><span class="p">,</span> <span class="s">&#39;combinatorial&#39;</span><span class="p">)</span>
+        <span class="n">G</span> <span class="p">=</span> <span class="n">gsp_create_laplacian</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;combinatorial&#39;</span><span class="p">);</span>
+        <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span>
+            <span class="n">fprintf</span><span class="p">([</span><span class="s">&#39;Compute the combinatorial laplacian &#39;</span><span class="p">,</span><span class="c">...</span>
+            <span class="s">&#39;for the resitance distance\n&#39;</span><span class="p">]);</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+    <span class="n">L</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">L</span><span class="p">;</span>
+<span class="k">else</span>
+    <span class="n">L</span> <span class="p">=</span> <span class="n">G</span><span class="p">;</span>
+<span class="k">end</span>
+
+
+
+<span class="n">pseudo</span><span class="p">=</span><span class="n">pinv</span><span class="p">(</span><span class="n">full</span><span class="p">(</span><span class="n">L</span><span class="p">));</span>
+<span class="n">N</span> <span class="p">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="n">d</span> <span class="p">=</span> <span class="nb">diag</span><span class="p">(</span><span class="n">pseudo</span><span class="p">);</span>
+
+<span class="n">rd</span> <span class="p">=</span> <span class="nb">repmat</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">)</span> <span class="o">+</span> <span class="nb">repmat</span><span class="p">(</span><span class="n">d</span><span class="o">&#39;</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">pseudo</span> <span class="o">-</span> <span class="n">pseudo</span><span class="o">&#39;</span><span class="p">;</span>
+
+<span class="k">end</span>
+</pre></div>
+
+
+
+</div>
+
+
+</td>
+</tr>
+</table>
+</div>
+<div id="space"></div>
+<div id="footer">
+Designed by: Nathanael Perraudin, David Shuman, Johan Paratte
+</div>
+</div>
+
+</body>
+</html>
+
+
+

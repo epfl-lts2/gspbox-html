@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="include/header.html">
+<link rel="stylesheet" href="include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="include/style.css" type="text/css">
+<link rel="stylesheet" href="include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>The Graph Signal Processing Toolbox</title>
+</head>
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container --!>
+<div class="container">
+<!-- Include main navigation -->
+<div class="masthead include" file="include/mainnav.html"></div>
+
+    <!-- main page -->
+    <div class="row-fluid">
+
+      <div class="span12">
+        <br/>
+
+        <h1>Download the GSPBOX</h1>
+        <p>You can have a look at the GitHub <a href="https://github.com/epfl-lts2/gspbox">repository page</a> to see all available versions, or just download the latest one by clicking on the button.</p>
+
+        <div style="text-align: center;">
+    <a class="btn btn-large btn-success" href="https://github.com/epfl-lts2/gspbox/releases/latest">Download the GSPBox</a><br/> 
+            </div>
+
+        <br/>
+
+
+
+<h2>Installation</h2>
+    <p>
+   To install, simply unpack the package. The toolbox is contained in the 'gsp' directory and in all the subdirectories. To use the toolbox, start Matlab, change to the 'gsp' directory and run the <pre>gsp_start</pre> command. This will set up the necessary paths and perform the necessary initializations.</p>
+
+   <p>To compile the mex interfaces for faster execution of the toolbox and install third party software type the command: <pre>gsp_install</pre>Further installation instructions can be found <a href="https://github.com/epfl-lts2/gspbox/blob/master/README.md">here</a>. 
+   </p>
+
+<h2>FLANN library</h2>
+   <p>The GSPBox uses <a href="http://www.cs.ubc.ca/research/flann/">FLANN</a> (Fast Library for Approximate Nearest Neighbors) to efficiently construct large nearest neighbors graphs. You should ideally compile FLANN on your computer. Before you start, be sure that all MATLAB executables are in your path. The FLANN sources are included. You can simply open a terminal, navigate to the GSPBox folder and type the following commands to configure and build the library:
+<pre>cd 3rdparty/sources/flann-1.8.4-src/cmake/
+cmake .. 
+make</pre>
+Please verify that the compilation worked by checking the existence of the compiled library:
+  <pre>ls src/matlab/nearest_neighbors.*</pre>
+If there is no file, but the compilation seemed to have run without errors, be sure that the bin folder of MATLAB is in your path. If the compilation worked, please move the built library:
+<pre>mv src/matlab/nearest_neighbors.* ../../../flann/</pre>
+<h2>FLANN pre-compiled library</h2>
+As the compilation of FLANN can be slightly tricky, we provide binaries for some architectures.
+</p>
+   <ul>
+    <li>   <a href="flann/nearest_neighbors.mexa64"> Linux 64bits </a></li>
+    <li>   <a href="flann/nearest_neighbors.mexmaci64"> Mac OS X 64bits </a></li>
+    </ul>
+    <p> The downloaded file should be placed in the "3rdparty/flann/" folder (from the root of the toolbox). If it does not work, you may try to install the library with the <a hrer="http://www.pointclouds.org/downloads/">PCL installer</a>.
+     </p>
+      </div><!--</span12>-->
+    </div><!--</row-fluid>-->
+
+
+    <!-- footer -->
+
+  <div class="include" file="include/footer.html"></div>
+</div><!--</container>-->
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="include/gspbox.js" type="text/javascript"></script>
+</body>
+</html>
+

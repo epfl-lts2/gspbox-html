@@ -1,0 +1,19 @@
+Polynomial filtering required. Computing polynomial coefficients...
+[Warning: GSP_EIGENSPACE_ESTIMATION: The variable lmax is not available.The
+function will compute it for you. However, if you apply many time this
+function, you should precompute it using the function: gsp_estimate_lmax.] 
+[> In gsp_eigenspace_estimation (line 68)
+  In plotexec (line 8)] 
+Estimation of lambda_kIter #1 - lest: 0.166741 [26] - lmin: 0.000000 [0] - lmax: 5.335718 [256] || best: 0.000000 [0]
+Iter #2 - lest: 0.051305 [10] - lmin: 0.000000 [0] - lmax: 0.166741 [26] || best: 0.051305 [10]
+Iter #3 - lest: 0.041044 [7] - lmin: 0.000000 [0] - lmax: 0.051305 [10] || best: 0.041044 [7]
+Iter #4 - lest: 0.044464 [8] - lmin: 0.041044 [7] - lmax: 0.051305 [10] || best: 0.044464 [8]
+using our accelerated method.
+* Estimated lk: 4.446432e-02
+* Time to estimate lk: 0.050015 sec
+* in 4 iterations with k_est=8 (target=8)
+* Time to compute polynomial coefficients: 0.002118 sec.
+Filtering random signals...
+* Time to filter random signals: 0.004980 sec.
+Computing the SVD for eigenspace recovery...
+* Time to compute SVD: 0.001495 sec.

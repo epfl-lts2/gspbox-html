@@ -1,0 +1,20 @@
+G = 
+
+  struct with fields:
+
+             N: 100
+            Ne: 1000
+             W: [100×100 double]
+             E: {100×1 cell}
+    hypergraph: 1
+      directed: 1
+        coords: [100×2 double]
+          type: 'Nearest neighboors hypergraph'
+      lap_type: 'normalized'
+         sigma: 0.0584
+             A: [100×100 double]
+            de: [100×1 double]
+            dv: [100×1 double]
+             L: [100×100 double]
+             d: [100×1 double]
+      plotting: [1×1 struct]

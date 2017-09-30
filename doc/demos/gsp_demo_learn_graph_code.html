@@ -1,0 +1,358 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_DEMO_LEARN_GRAPH - Demonstration of learning a graph from data</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_demo_learn_graph.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p><div id="menutitle">See also:</div>
+<ul>
+<li><a href="#BASEURL#/doc/learn_graph/gsp_learn_graph_l2_degrees.html">gsp_learn_graph_l2_degrees</a></li>
+</ul>
+</p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_DEMO_LEARN_GRAPH - Demonstration of learning a graph from data</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="c">%GSP_DEMO_LEARN_GRAPH Demonstration of learning a graph from data</span>
+<span class="c">%</span>
+<span class="c">%   In this demo, we show how the graph learning can be used to learn a</span>
+<span class="c">%   graph from smoothly changing signals. The theory behind the algorithm</span>
+<span class="c">%   can be found in</span>
+<span class="c">%</span>
+<span class="c">%   [1] V. Kalofolias, How to learn a graph from smooth signals, AISTATS</span>
+<span class="c">%   2016.</span>
+<span class="c">%</span>
+<span class="c">%   Suppose that we have some 2 dimensional smooth functions:</span>
+<span class="c">%</span>
+<span class="c">%             f1 = @(x,y) 20  (-sin((2-x-y).^2)/2 + cos(y*3));</span>
+<span class="c">%             f2 = @(x,y) 30  cos((x+y).^2);</span>
+<span class="c">%             f3 = @(x,y) 30  ((x-.5).^2 + (y-.5).^3 + x - y);</span>
+<span class="c">%             f4 = @(x,y) 50  sin(3*((x-.5).^2+(y-.5).^2));</span>
+<span class="c">%</span>
+<span class="c">%   and we have uniform samples as features, displayed below:</span>
+<span class="c">%</span>
+<span class="c">%             figure;</span>
+<span class="c">%             subplot(2,2,1); scatter(xc, yc, 700, X(:,1), &#39;.&#39;); </span>
+<span class="c">%             title(&#39;1st smooth signal&#39;); axis off; colorbar;</span>
+<span class="c">%             subplot(2,2,2); scatter(xc, yc, 700, X(:,2), &#39;.&#39;);</span>
+<span class="c">%             title(&#39;2nd smooth signal&#39;); axis off; colorbar;</span>
+<span class="c">%             subplot(2,2,3); scatter(xc, yc, 700, X(:,3), &#39;.&#39;); </span>
+<span class="c">%             title(&#39;3rd smooth signal&#39;); axis off; colorbar;</span>
+<span class="c">%             subplot(2,2,4); scatter(xc, yc, 700, X(:,4), &#39;.&#39;); </span>
+<span class="c">%             title(&#39;4th smooth signal&#39;); axis off; colorbar;</span>
+<span class="c">%</span>
+<span class="c">%   Figure 1: Different signals</span>
+<span class="c">%</span>
+<span class="c">%      </span>
+<span class="c">%</span>
+<span class="c">%   We can compute the pairwise distances of the features and learn a graph</span>
+<span class="c">%   using them:</span>
+<span class="c">%</span>
+<span class="c">%             Z1 = gsp_distanz(X(:, 1)&#39;).^2;</span>
+<span class="c">%             W1 = gsp_learn_graph_log_degrees(Z1, 1.5, 1, params);</span>
+<span class="c">%</span>
+<span class="c">%   The second parameter penalizes the formation of un-connected nodes, and</span>
+<span class="c">%   the third penalizes the formation of too strong weights. We then clean</span>
+<span class="c">%   any tiny edges (due to numerical error), to obtain a sparse weighted</span>
+<span class="c">%   adjacency matrix. We feed this to GSP_GRAPH to create a graph with</span>
+<span class="c">%   the given coordinates and weights: </span>
+<span class="c">%             </span>
+<span class="c">%             W1(W1&lt;1e-5) = 0;</span>
+<span class="c">%             G1 = gsp_graph(W1, [xc, yc]);</span>
+<span class="c">%</span>
+<span class="c">%   We can also update the weights of an already existing graph using</span>
+<span class="c">%   GSP_UPDATE_WEIGHTS. If we learn the graphs of all four above</span>
+<span class="c">%   functions, we get quite different results:</span>
+<span class="c">%</span>
+<span class="c">%             figure;</span>
+<span class="c">%             subplot(2,2,1); gsp_plot_edges(G1, params_plot);</span>
+<span class="c">%             title(&#39;graph learned from 1st smooth signal&#39;);</span>
+<span class="c">%             subplot(2,2,2); gsp_plot_edges(G2, params_plot);</span>
+<span class="c">%             title(&#39;graph learned from 2nd smooth signal&#39;);</span>
+<span class="c">%             subplot(2,2,3); gsp_plot_edges(G3, params_plot);</span>
+<span class="c">%             title(&#39;graph learned from 3rd smooth signal&#39;);</span>
+<span class="c">%             subplot(2,2,4); gsp_plot_edges(G4, params_plot);</span>
+<span class="c">%             title(&#39;graph learned from 4th smooth signal&#39;);</span>
+<span class="c">%</span>
+<span class="c">%   Figure 2: Different graphs learned</span>
+<span class="c">%</span>
+<span class="c">%      </span>
+<span class="c">%</span>
+<span class="c">%   Note that the edges follow the level curves of the above functions.</span>
+<span class="c">%</span>
+<span class="c">%   If we use all four above smooth functions as features to learn the</span>
+<span class="c">%   graph:</span>
+<span class="c">%</span>
+<span class="c">%             Z = gsp_distanz(X&#39;).^2;</span>
+<span class="c">%             W = gsp_learn_graph_log_degrees(Z/500, 2, 1, params);</span>
+<span class="c">%</span>
+<span class="c">%   we get a result that has more local edges:</span>
+<span class="c">%</span>
+<span class="c">%             params_plot.show_edges = 1;</span>
+<span class="c">%             G.plotting.vertex_size = 5;</span>
+<span class="c">%             figure; gsp_plot_graph(G, params_plot);</span>
+<span class="c">%             title(&#39;Graph with edges learned from above 4 signals&#39;);</span>
+<span class="c">%             </span>
+<span class="c">%   Figure 3: Graph with edges learned from above 4 signals</span>
+<span class="c">%</span>
+<span class="c">%      </span>
+<span class="c">%</span>
+<span class="c">%   This is close to the graph that we would learn using the acutal</span>
+<span class="c">%   coordinates as features. So why does it work so well? We can see that</span>
+<span class="c">%   the pattern of the pairwise distances using these features is similar</span>
+<span class="c">%   to the one of the pairwise geometric distances between nodes:</span>
+<span class="c">%</span>
+<span class="c">%             figure;</span>
+<span class="c">%             subplot(1, 2, 1); </span>
+<span class="c">%             imagesc(gsp_distanz(X&#39;)); </span>
+<span class="c">%             title(&#39;Geometric pairwise distances between nodes&#39;);</span>
+<span class="c">%             subplot(1, 2, 2);</span>
+<span class="c">%             imagesc(gsp_distanz([xc, yc]&#39;));</span>
+<span class="c">%             title(&#39;Pairwise distances computed from features&#39;);</span>
+<span class="c">%</span>
+<span class="c">%   Figure 4: Geometric pairwise distances between nodes</span>
+<span class="c">%</span>
+<span class="c">%      </span>
+<span class="c">%</span>
+<span class="c">%   Figure 5: Pairwise distances computed from features</span>
+<span class="c">%</span>
+<span class="c">%      </span>
+<span class="c">%</span>
+<span class="c">%   The functions available for learning a graph are</span>
+<span class="c">%   GSP_LEARN_GRAPH_LOG_DEGREES and GSP_LEARN_GRAPH_L2_DEGREES.</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   References:</span>
+<span class="c">%     V. Kalofolias. How to learn a graph from smooth signals. Technical</span>
+<span class="c">%     report, AISTATS 2016: proceedings at Journal of Machine Learning</span>
+<span class="c">%     Research (JMLR)., 2016.</span>
+<span class="c">%     </span>
+<span class="c">%</span>
+<span class="c">%   See also: gsp_learn_graph_l2_degrees</span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/demos/gsp_demo_learn_graph.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+<span class="c">%% Initialization</span>
+<span class="n">clear</span>
+
+<span class="n">gsp_reset_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">method</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>     <span class="c">%1 = logarithmic prior, 2 = L-2 prior</span>
+<span class="n">n</span> <span class="p">=</span> <span class="mi">100</span><span class="p">;</span>
+
+<span class="c">%% Sample space and define smooth signals</span>
+<span class="c">% we sample [0,1]^2 uniformly</span>
+<span class="n">coords</span> <span class="p">=</span> <span class="n">sortrows</span><span class="p">(</span><span class="nb">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+<span class="n">xc</span> <span class="p">=</span> <span class="n">coords</span><span class="p">(:,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="n">yc</span> <span class="p">=</span> <span class="n">coords</span><span class="p">(:,</span> <span class="mi">2</span><span class="p">);</span>
+
+<span class="c">% these functions change smoothly on the 2D plane</span>
+<span class="n">f1</span> <span class="p">=</span> <span class="p">@(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="mi">20</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="nb">sin</span><span class="p">((</span><span class="mi">2</span><span class="o">-</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">cos</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="mi">3</span><span class="p">));</span>
+<span class="n">f2</span> <span class="p">=</span> <span class="p">@(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="mi">30</span> <span class="o">*</span> <span class="nb">cos</span><span class="p">((</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">f3</span> <span class="p">=</span> <span class="p">@(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="mi">30</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span><span class="o">-</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span><span class="o">.^</span><span class="mi">3</span> <span class="o">+</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">);</span>
+<span class="n">f4</span> <span class="p">=</span> <span class="p">@(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="mi">50</span> <span class="o">*</span> <span class="nb">sin</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="p">((</span><span class="n">x</span><span class="o">-</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">));</span>
+<span class="c">% f1 = @(x,y) exp((-sin((2-x-y).^2)/2 + cos(y*3)))*50;</span>
+<span class="c">% f2 = @(x,y) exp(cos((x+y).^2))*80;</span>
+<span class="c">% f3 = @(x,y) exp((x-.5).^2 + (y-.5).^3 + x - y)*80;</span>
+<span class="c">% f4 = @(x,y) exp(sin(3*((x-.5).^2+(y-.5).^2)))*100;</span>
+
+<span class="c">%% The features are the values of the above smooth functions on our samples</span>
+<span class="n">X</span> <span class="p">=</span> <span class="p">[</span><span class="n">f1</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">),</span> <span class="n">f2</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">),</span> <span class="n">f3</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">),</span> <span class="n">f4</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">)];</span>
+
+
+<span class="c">%% Plot signals</span>
+<span class="n">figure</span><span class="p">;</span> 
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> <span class="n">scatter</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="n">X</span><span class="p">(:,</span><span class="mi">1</span><span class="p">),</span> <span class="s">&#39;.&#39;</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;1st smooth signal&#39;</span><span class="p">);</span> <span class="n">axis</span> <span class="n">off</span><span class="p">;</span> <span class="n">colorbar</span><span class="p">;</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> <span class="n">scatter</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="n">X</span><span class="p">(:,</span><span class="mi">2</span><span class="p">),</span> <span class="s">&#39;.&#39;</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;2nd smooth signal&#39;</span><span class="p">);</span> <span class="n">axis</span> <span class="n">off</span><span class="p">;</span> <span class="n">colorbar</span><span class="p">;</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span> <span class="n">scatter</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="n">X</span><span class="p">(:,</span><span class="mi">3</span><span class="p">),</span> <span class="s">&#39;.&#39;</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;3rd smooth signal&#39;</span><span class="p">);</span> <span class="n">axis</span> <span class="n">off</span><span class="p">;</span> <span class="n">colorbar</span><span class="p">;</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span> <span class="n">scatter</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="n">X</span><span class="p">(:,</span><span class="mi">4</span><span class="p">),</span> <span class="s">&#39;.&#39;</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;4th smooth signal&#39;</span><span class="p">);</span> <span class="n">axis</span> <span class="n">off</span><span class="p">;</span> <span class="n">colorbar</span><span class="p">;</span>
+
+<span class="c">%%</span>
+<span class="n">params</span><span class="p">.</span><span class="n">maxit</span> <span class="p">=</span> <span class="mi">50000</span><span class="p">;</span>
+<span class="n">params</span><span class="p">.</span><span class="n">step_size</span> <span class="p">=</span> <span class="mf">0.1</span><span class="p">;</span>
+<span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">params</span><span class="p">.</span><span class="n">tol</span> <span class="p">=</span> <span class="mf">1e-5</span><span class="p">;</span>
+
+<span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">s</span> <span class="p">=</span> <span class="nb">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">;</span>
+<span class="k">else</span>
+    <span class="n">s</span> <span class="p">=</span>  <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="nb">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="k">end</span>
+<span class="c">%%</span>
+
+<span class="n">Z1</span> <span class="p">=</span> <span class="n">gsp_distanz</span><span class="p">(</span><span class="n">X</span><span class="p">(:,</span> <span class="mi">1</span><span class="p">)</span><span class="o">&#39;</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">;</span>
+<span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="mi">1</span>
+     <span class="n">W1</span> <span class="p">=</span> <span class="n">gsp_learn_graph_log_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z1</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="c">%    W1 = sqrt(1.5)*gsp_learn_graph_log_degrees(Z1/sqrt(1.5), 1, 1, params);</span>
+<span class="k">else</span>
+    <span class="n">W1</span> <span class="p">=</span> <span class="n">gsp_learn_graph_l2_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z1</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="k">end</span>
+<span class="n">W1</span><span class="p">(</span><span class="n">W1</span><span class="o">&lt;</span><span class="mf">1e-5</span><span class="p">)</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">G1</span> <span class="p">=</span> <span class="n">gsp_graph</span><span class="p">(</span><span class="n">W1</span><span class="p">,</span> <span class="p">[</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">]);</span>
+
+<span class="c">%%</span>
+<span class="n">Z2</span> <span class="p">=</span> <span class="n">gsp_distanz</span><span class="p">(</span><span class="n">X</span><span class="p">(:,</span> <span class="mi">2</span><span class="p">)</span><span class="o">&#39;</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">;</span>
+<span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">W2</span> <span class="p">=</span> <span class="n">gsp_learn_graph_log_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z2</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="k">else</span>
+    <span class="n">W2</span> <span class="p">=</span> <span class="n">gsp_learn_graph_l2_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z2</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="k">end</span>
+<span class="n">W2</span><span class="p">(</span><span class="n">W2</span><span class="o">&lt;</span><span class="mf">1e-5</span><span class="p">)</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">G2</span> <span class="p">=</span> <span class="n">gsp_graph</span><span class="p">(</span><span class="n">W2</span><span class="p">,</span> <span class="p">[</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">]);</span>
+
+<span class="c">%%</span>
+<span class="n">Z3</span> <span class="p">=</span> <span class="n">gsp_distanz</span><span class="p">(</span><span class="n">X</span><span class="p">(:,</span> <span class="mi">3</span><span class="p">)</span><span class="o">&#39;</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">;</span>
+<span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">W3</span> <span class="p">=</span> <span class="n">gsp_learn_graph_log_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z3</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mf">5.5</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="k">else</span>
+    <span class="n">W3</span> <span class="p">=</span> <span class="n">gsp_learn_graph_l2_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z3</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="k">end</span>
+<span class="n">W3</span><span class="p">(</span><span class="n">W3</span><span class="o">&lt;</span><span class="mf">1e-5</span><span class="p">)</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">G3</span> <span class="p">=</span> <span class="n">gsp_graph</span><span class="p">(</span><span class="n">W3</span><span class="p">,</span> <span class="p">[</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">]);</span>
+
+<span class="c">%%</span>
+<span class="n">Z4</span> <span class="p">=</span> <span class="n">gsp_distanz</span><span class="p">(</span><span class="n">X</span><span class="p">(:,</span> <span class="mi">4</span><span class="p">)</span><span class="o">&#39;</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">;</span>
+<span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">W4</span> <span class="p">=</span> <span class="n">gsp_learn_graph_log_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z4</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mf">1.9</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="k">else</span>
+    <span class="n">W4</span> <span class="p">=</span> <span class="n">gsp_learn_graph_l2_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z4</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="k">end</span>
+<span class="n">W4</span><span class="p">(</span><span class="n">W4</span><span class="o">&lt;</span><span class="mf">1e-5</span><span class="p">)</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">G4</span> <span class="p">=</span> <span class="n">gsp_graph</span><span class="p">(</span><span class="n">W4</span><span class="p">,</span> <span class="p">[</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">]);</span>
+
+<span class="c">%%</span>
+<span class="n">Z</span> <span class="p">=</span> <span class="n">gsp_distanz</span><span class="p">(</span><span class="n">X</span><span class="o">&#39;</span><span class="p">)</span><span class="o">.^</span><span class="mi">2</span><span class="p">;</span>
+<span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">W</span> <span class="p">=</span> <span class="n">gsp_learn_graph_log_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z</span><span class="o">/</span><span class="mi">300</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="k">else</span>
+    <span class="n">W</span> <span class="p">=</span> <span class="n">gsp_learn_graph_l2_degrees</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">Z</span><span class="o">/</span><span class="mi">300</span><span class="p">,</span> <span class="n">s</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="p">);</span>
+<span class="k">end</span>
+<span class="n">W</span><span class="p">(</span><span class="n">W</span><span class="o">&lt;</span><span class="mf">1e-5</span><span class="p">)</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">G</span> <span class="p">=</span> <span class="n">gsp_graph</span><span class="p">(</span><span class="n">W</span> <span class="o">/</span> <span class="n">sum</span><span class="p">(</span><span class="n">W</span><span class="p">(:))</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span> <span class="p">[</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">]);</span>
+
+<span class="c">%%</span>
+<span class="c">% nnz(G0.W)</span>
+<span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Graph of signal 1: %d  edges\n&#39;</span><span class="p">,</span> <span class="n">nnz</span><span class="p">(</span><span class="n">W1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Graph of signal 2: %d  edges\n&#39;</span><span class="p">,</span> <span class="n">nnz</span><span class="p">(</span><span class="n">W2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Graph of signal 3: %d  edges\n&#39;</span><span class="p">,</span> <span class="n">nnz</span><span class="p">(</span><span class="n">W3</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Graph of signal 4: %d  edges\n&#39;</span><span class="p">,</span> <span class="n">nnz</span><span class="p">(</span><span class="n">W4</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Graph of all signals: %d  edges\n&#39;</span><span class="p">,</span> <span class="n">nnz</span><span class="p">(</span><span class="n">W</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+
+
+<span class="c">%% Plot individual graphs from each signal</span>
+ <span class="n">params_plot</span><span class="p">.</span><span class="n">edge_size</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="c">% params_plot.show_edges = 0;</span>
+<span class="n">figure</span><span class="p">;</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> <span class="n">gsp_plot_edges</span><span class="p">(</span><span class="n">G1</span><span class="p">,</span> <span class="n">params_plot</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;graph learned from 1st smooth signal&#39;</span><span class="p">);</span> <span class="n">ind</span> <span class="p">=</span> <span class="n">sum</span><span class="p">(</span><span class="n">G1</span><span class="p">.</span><span class="n">W</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">;</span> <span class="n">hold</span> <span class="n">on</span><span class="p">;</span> <span class="n">scatter</span><span class="p">(</span><span class="n">xc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="n">yc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="mi">40</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">);</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> <span class="n">gsp_plot_edges</span><span class="p">(</span><span class="n">G2</span><span class="p">,</span> <span class="n">params_plot</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;graph learned from 2nd smooth signal&#39;</span><span class="p">);</span> <span class="n">ind</span> <span class="p">=</span> <span class="n">sum</span><span class="p">(</span><span class="n">G2</span><span class="p">.</span><span class="n">W</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">;</span> <span class="n">hold</span> <span class="n">on</span><span class="p">;</span> <span class="n">scatter</span><span class="p">(</span><span class="n">xc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="n">yc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="mi">40</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">);</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span> <span class="n">gsp_plot_edges</span><span class="p">(</span><span class="n">G3</span><span class="p">,</span> <span class="n">params_plot</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;graph learned from 3rd smooth signal&#39;</span><span class="p">);</span> <span class="n">ind</span> <span class="p">=</span> <span class="n">sum</span><span class="p">(</span><span class="n">G3</span><span class="p">.</span><span class="n">W</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">;</span> <span class="n">hold</span> <span class="n">on</span><span class="p">;</span> <span class="n">scatter</span><span class="p">(</span><span class="n">xc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="n">yc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="mi">40</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">);</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span> <span class="n">gsp_plot_edges</span><span class="p">(</span><span class="n">G4</span><span class="p">,</span> <span class="n">params_plot</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;graph learned from 4th smooth signal&#39;</span><span class="p">);</span> <span class="n">ind</span> <span class="p">=</span> <span class="n">sum</span><span class="p">(</span><span class="n">G4</span><span class="p">.</span><span class="n">W</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">;</span> <span class="n">hold</span> <span class="n">on</span><span class="p">;</span> <span class="n">scatter</span><span class="p">(</span><span class="n">xc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="n">yc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="mi">40</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">);</span>
+
+<span class="c">%% Plot graph from all signals</span>
+<span class="n">params_plot</span><span class="p">.</span><span class="n">edge_size</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">params_plot</span><span class="p">.</span><span class="n">show_edges</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">vertex_size</span> <span class="p">=</span> <span class="mi">5</span><span class="p">;</span>
+<span class="n">figure</span><span class="p">;</span> <span class="n">gsp_plot_graph</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">params_plot</span><span class="p">);</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;Graph with edges learned from above 4 signals&#39;</span><span class="p">);</span>
+<span class="n">hold</span> <span class="n">on</span><span class="p">;</span> <span class="n">ind</span> <span class="p">=</span> <span class="n">sum</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">W</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">;</span> <span class="n">hold</span> <span class="n">on</span><span class="p">;</span> <span class="n">scatter</span><span class="p">(</span><span class="n">xc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="n">yc</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="mi">40</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">);</span>
+
+
+<span class="c">%% Why does it work so well?</span>
+<span class="n">figure</span><span class="p">;</span> <span class="n">imagesc</span><span class="p">(</span><span class="n">gsp_distanz</span><span class="p">(</span><span class="n">X</span><span class="o">&#39;</span><span class="p">));</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;Geometric pairwise distances between nodes&#39;</span><span class="p">);</span>
+<span class="n">figure</span><span class="p">;</span> <span class="n">imagesc</span><span class="p">(</span><span class="n">gsp_distanz</span><span class="p">([</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">]</span><span class="o">&#39;</span><span class="p">));</span> <span class="n">title</span><span class="p">(</span><span class="s">&#39;Pairwise distances computed from features&#39;</span><span class="p">);</span>
+
+<span class="c">% [dc2_sorted, ind_sorted] = sort(squareform(gsp_distanz([xc, yc]&#39;)), &#39;ascend&#39;);</span>
+<span class="c">% dx2 = squareform(gsp_distanz(X&#39;));</span>
+
+<span class="c">% figure; plot(dc2_sorted/sum(dc2_sorted)); hold on; plot(dx2(ind_sorted)/sum(dx2));</span>
+<span class="c">% title(&#39;Sorted pairwise distances&#39;);</span>
+<span class="c">% legend(&#39;geometric distances&#39;, &#39;distances computed from features&#39;);</span>
+
+<span class="c">%% Other choices of smooth functions:</span>
+<span class="c">% f1 = @(x,y) (-sin((2-x-y).^2)/2 + cos(y*3))*50;</span>
+<span class="c">% f2 = @(x,y) cos((x+y).^2)*80;</span>
+<span class="c">% f3 = @(x,y) ((x-.5).^2 + (y-.5).^3 + x - y)*80;</span>
+<span class="c">% f4 = @(x,y) sin(3*((x-.5).^2+(y-.5).^2))*150;</span>
+
+<span class="c">% f1 = @(x,y) exp(2*((-sin((2-x-y).^2)/2 + cos(y*3))))*25;</span>
+<span class="c">% f2 = @(x,y) exp(2*(cos((x+y).^2)))*24;</span>
+<span class="c">% f3 = @(x,y) exp(2*((x-.5).^2 + (y-.5).^3 + x - y))*24;</span>
+<span class="c">% f4 = @(x,y) exp(2*(sin(3*((x-.5).^2+(y-.5).^2))))*30;</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

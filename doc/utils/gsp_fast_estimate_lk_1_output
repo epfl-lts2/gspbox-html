@@ -1,0 +1,8 @@
+[Warning: GSP_FAST_ESTIMATE_LK: The variable lmax is not available.The function
+will compute it for you. However, if you apply many time this function, you
+should precompute it using the function: gsp_estimate_lmax.] 
+[> In gsp_fast_estimate_lk (line 62)
+  In plotexec (line 8)] 
+Iter #1 - lest: 0.166720 [24] - lmin: 0.000000 [0] - lmax: 5.335049 [256] || best: 0.000000 [0]
+Iter #2 - lest: 0.055573 [10] - lmin: 0.000000 [0] - lmax: 0.166720 [24] || best: 0.055573 [10]
+Iter #3 - lest: 0.044459 [8] - lmin: 0.000000 [0] - lmax: 0.055573 [10] || best: 0.044459 [8]

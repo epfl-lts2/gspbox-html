@@ -1,0 +1,223 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_ADJ2VEC - Prepare the graph for the gradient computation</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_adj2vec.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p><div id="menutitle">See also:</div>
+<ul>
+<li><a href="#BASEURL#/doc/operators/gsp_grad.html">gsp_grad</a></li>
+<li><a href="#BASEURL#/doc/operators/gsp_div.html">gsp_div</a></li>
+</ul>
+</p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_ADJ2VEC - Prepare the graph for the gradient computation</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span>[G] <span class="p">=</span><span class="w"> </span><span class="nf">gsp_adj2vec</span><span class="p">(</span>G<span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_ADJ2VEC Prepare the graph for the gradient computation</span>
+<span class="c">%   Usage: [G] = gsp_adj2vec(G)</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters:</span>
+<span class="c">%       G   : Graph structure</span>
+<span class="c">%   Output parameters:</span>
+<span class="c">%       G   : Graph structure</span>
+<span class="c">%</span>
+<span class="c">%   This function converts adjacency matrix to edge vector form. It also</span>
+<span class="c">%   add the field G.Diff that is the sparse gradient matrix</span>
+<span class="c">%</span>
+<span class="c">%   See also: gsp_grad gsp_div</span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/utils/gsp_adj2vec.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+<span class="c">% Author: Nathanael Perraudin, Vassilis Kalofolias, Francesco Grassi</span>
+<span class="c">% Date  : 5 August 2014</span>
+<span class="c">% Testing: test_operators</span>
+
+<span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;Gm&#39;</span><span class="p">);</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Gm</span> <span class="p">=</span> <span class="n">gsp_adj2vec</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">Gm</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="n">G</span><span class="p">.</span><span class="n">directed</span>
+    <span class="c">% Decompose adjacency matrix W = Wsym + Wasym</span>
+    <span class="p">[</span><span class="n">Wsym</span><span class="p">,</span><span class="n">Wasym</span><span class="p">]=</span><span class="n">gsp_decompose_asymmatrix</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">W</span><span class="p">);</span>
+    
+    <span class="c">% Find sym and asym edges</span>
+    <span class="p">[</span><span class="n">v_sym_i</span><span class="p">,</span> <span class="n">v_sym_j</span><span class="p">,</span> <span class="n">weights_sym</span><span class="p">]</span> <span class="p">=</span> <span class="nb">find</span><span class="p">(</span><span class="n">Wsym</span><span class="p">);</span>
+    <span class="p">[</span><span class="n">v_asym_i</span><span class="p">,</span> <span class="n">v_asym_j</span><span class="p">,</span> <span class="n">weights_asym</span><span class="p">]</span> <span class="p">=</span> <span class="nb">find</span><span class="p">(</span><span class="n">Wasym</span><span class="p">);</span>
+    
+    
+    <span class="n">G</span><span class="p">.</span><span class="n">v_out</span> <span class="p">=</span> <span class="n">v_asym_i</span><span class="p">;</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">v_in</span> <span class="p">=</span> <span class="n">v_asym_j</span><span class="p">;</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">weights</span> <span class="p">=</span> <span class="n">weights_asym</span><span class="p">;</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Ne</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">v_in</span><span class="p">);</span>
+    <span class="n">Diff_dir</span> <span class="p">=</span> <span class="n">gsp_grad_mat</span><span class="p">(</span> <span class="n">G</span> <span class="p">);</span>
+    
+    <span class="n">G</span><span class="p">.</span><span class="n">v_out</span> <span class="p">=</span> <span class="n">v_sym_i</span><span class="p">;</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">v_in</span> <span class="p">=</span> <span class="n">v_sym_j</span><span class="p">;</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">weights</span> <span class="p">=</span> <span class="n">weights_sym</span><span class="p">;</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Ne</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">v_in</span><span class="p">);</span>
+    <span class="n">Diff_und</span> <span class="p">=</span> <span class="n">gsp_grad_mat</span><span class="p">(</span> <span class="n">G</span> <span class="p">);</span>
+    
+    
+    <span class="n">G</span><span class="p">.</span><span class="n">v_out</span> <span class="p">=</span> <span class="p">[</span><span class="n">v_sym_i</span><span class="p">;</span><span class="n">v_asym_i</span><span class="p">];</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">v_in</span> <span class="p">=</span> <span class="p">[</span><span class="n">v_sym_j</span><span class="p">;</span><span class="n">v_asym_j</span><span class="p">];</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">weights</span> <span class="p">=</span> <span class="p">[</span><span class="n">weights_sym</span><span class="p">;</span><span class="n">weights_asym</span><span class="p">];</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Ne</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">v_in</span><span class="p">);</span>
+    
+    <span class="c">% Compute gradient matrix</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Diff</span> <span class="p">=</span> <span class="p">[</span><span class="n">Diff_dir</span><span class="p">;</span><span class="n">Diff_und</span><span class="p">];</span>
+
+    <span class="c">% Compute flow matrix</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Fo</span> <span class="p">=</span> <span class="p">[</span> <span class="n">Diff_dir</span><span class="p">;</span><span class="n">Diff_und</span>  <span class="p">];</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Fo</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">Fo</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> 
+    
+    <span class="n">G</span><span class="p">.</span><span class="n">Fi</span> <span class="p">=</span> <span class="p">[</span> <span class="n">Diff_dir</span><span class="p">;</span><span class="n">Diff_und</span>  <span class="p">];</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Fi</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">Fi</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+    
+    <span class="n">G</span><span class="p">.</span><span class="n">Adv</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">Diff</span><span class="o">&#39;*</span><span class="n">G</span><span class="p">.</span><span class="n">Fo</span><span class="p">;</span>
+    
+<span class="k">else</span>
+    <span class="c">% Keep each edge only once (they are duplicated!). Keep also loops.</span>
+    <span class="p">[</span><span class="n">v_i</span><span class="p">,</span> <span class="n">v_j</span><span class="p">,</span> <span class="n">weights</span><span class="p">]</span> <span class="p">=</span> <span class="nb">find</span><span class="p">(</span><span class="nb">tril</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">W</span><span class="p">));</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">v_out</span> <span class="p">=</span> <span class="n">v_j</span><span class="p">;</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">v_in</span> <span class="p">=</span> <span class="n">v_i</span><span class="p">;</span>
+
+    <span class="c">% the indices of the edges in the Adgacency matrix A:</span>
+    <span class="c">%G.ind_edges = sub2ind(size(G.W), G.v_in, G.v_out);</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">weights</span> <span class="p">=</span> <span class="n">weights</span><span class="p">;</span>         <span class="c">% |E| x 1</span>
+    <span class="n">G</span><span class="p">.</span><span class="n">Ne</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">v_in</span><span class="p">);</span>
+
+    <span class="n">G</span><span class="p">.</span><span class="n">Diff</span> <span class="p">=</span> <span class="n">gsp_grad_mat</span><span class="p">(</span> <span class="n">G</span> <span class="p">);</span>
+<span class="k">end</span>
+
+<span class="k">end</span>
+
+
+
+
+<span class="c">% Old code from Vasilis</span>
+<span class="c">% [v_i, v_j] = find(G.W);</span>
+<span class="c">% </span>
+<span class="c">% % Keep each edge only once (they are duplicated!). Keep also loops.</span>
+<span class="c">% ind_keep = (v_i &gt;= v_j);</span>
+<span class="c">% G.v_in = v_i(ind_keep);</span>
+<span class="c">% G.v_out = v_j(ind_keep);</span>
+<span class="c">% </span>
+<span class="c">% % the indices of the edges in the Adgacency matrix A:</span>
+<span class="c">% G.ind_edges = sub2ind(size(G.W), G.v_in, G.v_out);</span>
+<span class="c">% G.weights = full(G.W(G.ind_edges));         % |E| x 1</span>
+<span class="c">% G.Ne = size(G.v_in);</span>
+
+<span class="c">% Old doc from Vassilis</span>
+
+<span class="c">% [v_i, v_j, weights, ind_e] = GRAPH_ADJ2VEC(A):</span>
+<span class="c">%</span>
+<span class="c">% Convert adjacency matrix to edge vector form.</span>
+<span class="c">%</span>
+<span class="c">% For a graph with |V| nodes and |E| edges we have:</span>
+<span class="c">%</span>
+<span class="c">%       A: adjacency matrix                 |V| x |V|</span>
+<span class="c">%       v_i, v_j: indices of the edges      |E| x 1 </span>
+<span class="c">%</span>
+<span class="c">% that is:</span>
+<span class="c">% there is an edge from vertex v_i(e) to node v_j(e) for all e \in E</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%INPUT:</span>
+<span class="c">% A: adjacency matrix with weights</span>
+<span class="c">%</span>
+<span class="c">%OUTPUTS:</span>
+<span class="c">%</span>
+<span class="c">% weights(e) = A( v_i(e), v_j(e) )</span>
+<span class="c">%            = A( ind_e(e) )</span>
+<span class="c">%</span>
+<span class="c">% weights will contain all edges only once, i.e. will use only the triu</span>
+<span class="c">% part of the adjacency matrix. It also handles the loops (diagonal</span>
+<span class="c">% elements of A).</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%see also: graph_grad, graph_div</span>
+<span class="c">%</span>
+<span class="c">% code author: Vassilis Kalofolias</span>
+<span class="c">% date: August 2013</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+

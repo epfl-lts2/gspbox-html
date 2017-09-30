@@ -1,0 +1,279 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_PLOT_SIGNAL - Plot a graph signal in 2D or 3D</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="text-left">
+                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_plot_signal.html">View the help</a></div>
+</div>
+            </div>
+            <div class="text-right">
+                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="row-fluid">
+                <div class="span2 span2-doc">
+                    <div class="include" file='../include/docnav.html'></div>
+                    <br/>
+
+                    <div id="seealso"><p><div id="menutitle">See also:</div>
+<ul>
+<li><a href="#BASEURL#/doc/plotting/gsp_plot_graph.html">gsp_plot_graph</a></li>
+<li><a href="#BASEURL#/doc/plotting/gsp_plot_signal_spectral.html">gsp_plot_signal_spectral</a></li>
+</ul>
+</p></div>
+
+                    <br/>
+                </div>
+            <div class="span10 span10-doc">
+           
+                    <h1 class="title">GSP_PLOT_SIGNAL - Plot a graph signal in 2D or 3D</h1>
+<h2>Program code:</h2>
+<div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="nf">gsp_plot_signal</span><span class="p">(</span>G,signal,param<span class="p">)</span><span class="w"></span>
+<span class="c">%GSP_PLOT_SIGNAL  Plot a graph signal in 2D or 3D</span>
+<span class="c">%   Usage:  gsp_plot_signal(G,signal);</span>
+<span class="c">%           gsp_plot_signal(G,signal,param);</span>
+<span class="c">%</span>
+<span class="c">%   Input parameters:</span>
+<span class="c">%         G          : Graph structure.</span>
+<span class="c">%         signal     : Graph signal.</span>
+<span class="c">%         param      : Optional variable containing additional parameters.</span>
+<span class="c">%   Output parameters:</span>
+<span class="c">%         none</span>
+<span class="c">%</span>
+<span class="c">%   &#39;gsp_plot_signal(G,f)&#39; plots a graph signal in 2D or 3D, using the adjacency </span>
+<span class="c">%   matrix (G.A), the plotting coordinates (G.coords), the </span>
+<span class="c">%   coordinate limits (G.plotting.limits), the edge width (G.plotting.edge_width), the </span>
+<span class="c">%   edge color (G.plotting.edge_color), the edge style (G.plotting.edge_style), and the </span>
+<span class="c">%   vertex size (G.vertex_size).</span>
+<span class="c">%</span>
+<span class="c">%   Example:</span>
+<span class="c">%</span>
+<span class="c">%          G = gsp_ring(15);</span>
+<span class="c">%          f = sin((1:15)*2*pi/15);</span>
+<span class="c">%          gsp_plot_signal(G,f)</span>
+<span class="c">%</span>
+<span class="c">%   Additional parameters</span>
+<span class="c">%   ---------------------</span>
+<span class="c">%    param.show_edges : Set to 0 to only draw the vertices. (default G.Ne &lt; 10000 )</span>
+<span class="c">%    param.cp         : Camera position for a 3D graph.</span>
+<span class="c">%    param.vertex_size*: Size of circle representing each signal component.</span>
+<span class="c">%    param.colorbar   : Set to 0 to not show the colorbar</span>
+<span class="c">%    param.climits    : Limits of the colorbar</span>
+<span class="c">%    param.vertex_highlight*: Vector of indices of vertices to be highlighted</span>
+<span class="c">%    param.bar        : 1 Display bar for the graph. 0 Display color</span>
+<span class="c">%                          points. (default 0);</span>
+<span class="c">%    param.bar_width  : Width of the bar (default 1)</span>
+<span class="c">%    param.clear      : Clear axes (default 1)</span>
+<span class="c">%</span>
+<span class="c">%   See also: gsp_plot_graph gsp_plot_signal_spectral</span>
+<span class="c">%</span>
+<span class="c">%</span>
+<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/plotting/gsp_plot_signal.php</span>
+
+<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
+<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">%</span>
+<span class="c">% This program is free software: you can redistribute it and/or modify</span>
+<span class="c">% it under the terms of the GNU General Public License as published by</span>
+<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">% (at your option) any later version.</span>
+<span class="c">%</span>
+<span class="c">% This program is distributed in the hope that it will be useful,</span>
+<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">% GNU General Public License for more details.</span>
+<span class="c">%</span>
+<span class="c">% You should have received a copy of the GNU General Public License</span>
+<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c">% If you use this toolbox please kindly cite</span>
+<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
+<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
+<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
+<span class="c">% http://arxiv.org/abs/1408.5781</span>
+
+
+<span class="c">% Author :  Nathanael Perraudin, David I Shuman</span>
+<span class="c">% Testing: test_plotting</span>
+
+  
+
+<span class="c">% Handling optional inputs</span>
+<span class="k">if</span> <span class="n">nargin</span> <span class="o">&lt;</span> <span class="mi">3</span>
+   <span class="n">param</span> <span class="p">=</span> <span class="n">struct</span><span class="p">;</span>
+<span class="k">end</span>
+
+
+<span class="k">if</span> <span class="o">~</span><span class="nb">numel</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">error</span><span class="p">(</span><span class="s">&#39;There is no coordinates associated to this graph!&#39;</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">imag</span><span class="p">(</span><span class="n">signal</span><span class="p">(:))))</span><span class="o">&gt;</span><span class="mf">1e-10</span>
+   <span class="n">error</span><span class="p">(</span><span class="s">&#39;GSP_PLOT_SIGNAL: can not display complex signal&#39;</span><span class="p">)</span> 
+<span class="k">end</span>
+
+<span class="n">signal</span> <span class="p">=</span> <span class="nb">real</span><span class="p">(</span><span class="n">signal</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;show_edges&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">show_edges</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">Ne</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;bar&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">bar</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;clear&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">clear</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;bar_width&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">bar_width</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;vertex_highlight&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">vertex_highlight</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;vertex_size&#39;</span><span class="p">),</span> 
+    <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">,</span><span class="s">&#39;vertex_size&#39;</span><span class="p">)</span>
+        <span class="n">param</span><span class="p">.</span><span class="n">vertex_size</span><span class="p">=</span><span class="mi">500</span><span class="p">;</span> 
+    <span class="k">else</span>
+        <span class="n">param</span><span class="p">.</span><span class="n">vertex_size</span><span class="p">=</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">vertex_size</span><span class="o">*</span><span class="mi">10</span><span class="p">;</span>
+    <span class="k">end</span>
+<span class="k">else</span>
+    <span class="n">param</span><span class="p">.</span><span class="n">vertex_size</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">vertex_size</span><span class="o">*</span><span class="mi">10</span><span class="p">;</span> 
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;colorbar&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">colorbar</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;cp&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">,</span> <span class="s">&#39;cp&#39;</span><span class="p">)</span>
+       <span class="n">param</span><span class="p">.</span><span class="n">cp</span> <span class="p">=</span> <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">cp</span><span class="p">;</span> 
+    <span class="k">else</span>
+       <span class="n">param</span><span class="p">.</span><span class="n">cp</span><span class="p">=[</span><span class="o">-</span><span class="mi">6</span>   <span class="o">-</span><span class="mi">3</span>  <span class="mi">160</span><span class="p">];</span> 
+    <span class="k">end</span>
+    
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;coords&#39;</span><span class="p">)</span>
+    <span class="n">error</span><span class="p">(</span><span class="s">&#39;GSP_PLOT_SIGNAL: Cannot plot a graph without coordinate!&#39;</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c">% Clear axes</span>
+<span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">clear</span>
+    <span class="n">cla</span><span class="p">;</span>
+<span class="k">end</span>
+<span class="n">G</span> <span class="p">=</span> <span class="n">gsp_graph_default_plotting_parameters</span><span class="p">(</span><span class="n">G</span><span class="p">);</span>
+
+<span class="n">hold</span> <span class="n">on</span><span class="p">;</span>
+
+
+<span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">show_edges</span>
+    <span class="n">gsp_plot_edges</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="n">param</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="nb">size</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">bar</span>
+        <span class="n">ind</span> <span class="p">=</span> <span class="nb">find</span><span class="p">(</span><span class="n">signal</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="n">plot3</span><span class="p">([</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span> <span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">&#39;</span><span class="p">],</span><span class="c">...</span>
+            <span class="p">[</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span> <span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">&#39;</span><span class="p">],</span><span class="c">...</span>
+            <span class="p">[</span><span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">length</span><span class="p">(</span><span class="n">ind</span><span class="p">));</span> <span class="nb">reshape</span><span class="p">(</span><span class="n">signal</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span><span class="mi">1</span><span class="p">,[])],</span><span class="c">...</span>
+            <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">edge_style</span><span class="p">,</span> <span class="s">&#39;LineWidth&#39;</span><span class="p">,</span><span class="n">param</span><span class="p">.</span><span class="n">bar_width</span><span class="p">,</span><span class="s">&#39;color&#39;</span><span class="p">,</span><span class="s">&#39;k&#39;</span><span class="p">);</span>
+        <span class="n">ind</span> <span class="p">=</span> <span class="nb">find</span><span class="p">(</span><span class="n">signal</span> <span class="o">&gt;</span><span class="p">=</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="n">plot3</span><span class="p">([</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span> <span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">&#39;</span><span class="p">],</span><span class="c">...</span>
+            <span class="p">[</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span> <span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">&#39;</span><span class="p">],</span><span class="c">...</span>
+            <span class="p">[</span><span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">length</span><span class="p">(</span><span class="n">ind</span><span class="p">));</span> <span class="nb">reshape</span><span class="p">(</span><span class="n">signal</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span><span class="mi">1</span><span class="p">,[])],</span><span class="c">...</span>
+            <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">edge_style</span><span class="p">,</span> <span class="s">&#39;LineWidth&#39;</span><span class="p">,</span><span class="n">param</span><span class="p">.</span><span class="n">bar_width</span><span class="p">,</span><span class="s">&#39;color&#39;</span><span class="p">,</span><span class="s">&#39;b&#39;</span><span class="p">);</span>
+        <span class="k">if</span> <span class="n">any</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">vertex_highlight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">vh</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">vertex_highlight</span><span class="p">;</span>
+            <span class="n">plot3</span><span class="p">([</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">vh</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span> <span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">vh</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">&#39;</span><span class="p">],</span><span class="c">...</span>
+                <span class="p">[</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">vh</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span> <span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">vh</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">&#39;</span><span class="p">],</span><span class="c">...</span>
+                <span class="p">[</span><span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">length</span><span class="p">(</span><span class="n">vh</span><span class="p">));</span> <span class="nb">reshape</span><span class="p">(</span><span class="n">signal</span><span class="p">(</span><span class="n">vh</span><span class="p">),</span><span class="mi">1</span><span class="p">,[])],</span><span class="c">...</span>
+                <span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">edge_style</span><span class="p">,</span> <span class="s">&#39;LineWidth&#39;</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">param</span><span class="p">.</span><span class="n">bar_width</span><span class="p">,</span><span class="s">&#39;color&#39;</span><span class="p">,</span><span class="s">&#39;m&#39;</span><span class="p">);</span>
+
+        <span class="k">end</span>   
+    <span class="k">else</span>
+        <span class="n">scatter</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">),</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">),</span> <span class="c">...</span>
+            <span class="n">param</span><span class="p">.</span><span class="n">vertex_size</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="s">&#39;.&#39;</span><span class="p">);</span>
+        <span class="k">if</span> <span class="n">any</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">vertex_highlight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">vh</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">vertex_highlight</span><span class="p">;</span>
+            <span class="n">scatter</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">vh</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">vh</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="c">...</span>
+                <span class="n">param</span><span class="p">.</span><span class="n">vertex_size</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#39;ok&#39;</span><span class="p">,</span><span class="s">&#39;LineWidth&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+
+        <span class="k">end</span>   
+    <span class="k">end</span>
+
+
+<span class="k">else</span> <span class="c">%if size(G.coords,2) == 3</span>
+    <span class="n">scatter3</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">1</span><span class="p">),</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">2</span><span class="p">),</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(:,</span><span class="mi">3</span><span class="p">),</span><span class="c">...</span>
+                    <span class="n">param</span><span class="p">.</span><span class="n">vertex_size</span><span class="p">,</span><span class="n">signal</span><span class="p">,</span><span class="s">&#39;.&#39;</span><span class="p">);</span>
+    <span class="k">if</span> <span class="n">any</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">vertex_highlight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">vh</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">vertex_highlight</span><span class="p">;</span>
+        <span class="n">scatter3</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">vh</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">vh</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">(</span><span class="n">vh</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="c">...</span>
+            <span class="n">param</span><span class="p">.</span><span class="n">vertex_size</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#39;ok&#39;</span><span class="p">);</span>
+
+    <span class="k">end</span>             
+
+<span class="k">end</span>
+
+
+<span class="n">axis</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">plotting</span><span class="p">.</span><span class="n">limits</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="nb">size</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">coords</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span> <span class="o">||</span> <span class="n">param</span><span class="p">.</span><span class="n">bar</span>
+    <span class="n">set</span><span class="p">(</span><span class="n">gca</span><span class="p">,</span><span class="s">&#39;CameraPosition&#39;</span><span class="p">,</span><span class="n">param</span><span class="p">.</span><span class="n">cp</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="o">~</span><span class="n">param</span><span class="p">.</span><span class="n">bar</span>
+    <span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;climits&#39;</span><span class="p">)</span>
+        <span class="n">caxis</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">climits</span><span class="p">);</span>
+    <span class="c">%else</span>
+        <span class="c">% no need to do anything, the following happens anyway!</span>
+        <span class="c">%set(gca,&#39;CLimMode&#39;,&#39;auto&#39;);</span>
+    <span class="k">end</span>
+
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">colorbar</span>
+        <span class="n">colorbar</span><span class="p">;</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+<span class="n">colormap</span><span class="p">(</span><span class="n">jet</span><span class="p">)</span>
+<span class="n">axis</span> <span class="n">off</span><span class="p">;</span>
+<span class="n">hold</span> <span class="n">off</span><span class="p">;</span>
+
+<span class="c">% TODO: use special presets of the following style for more graphs:</span>
+<span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="s">&#39;type&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">strcmp</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">type</span><span class="p">,</span> <span class="s">&#39;non_uniform&#39;</span><span class="p">)</span> <span class="o">||</span><span class="c">...</span>
+       <span class="n">strcmp</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">type</span><span class="p">,</span> <span class="s">&#39;sub-non_uniform&#39;</span><span class="p">)</span> <span class="o">||</span><span class="c">...</span>
+       <span class="n">strcmp</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">type</span><span class="p">,</span> <span class="s">&#39;non_uniform_patch&#39;</span><span class="p">)</span> <span class="o">||</span><span class="c">...</span>
+       <span class="n">strcmp</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">type</span><span class="p">,</span> <span class="s">&#39;sub-non_uniform_patch&#39;</span><span class="p">)</span>
+        <span class="n">axis</span> <span class="n">equal</span><span class="p">;</span> <span class="n">axis</span> <span class="n">tight</span><span class="p">;</span><span class="c">% axis on;</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+
