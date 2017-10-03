@@ -109,7 +109,7 @@ function relativetoabsolute(v){
     if( n!= -1)
     {
         var valid = v.substring(n);
-        var retval = valid.replace(/^#BASEURL#/,baseurl);
+        var retval = valid.replace(/^#BASEURL#/,baseurl+'/gspbox-html');
 
         //console.log('Old:' + v);
         //console.log('New:' + retval);

@@ -2,8 +2,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head class="include" file="../../include/header.html">
-<link rel="stylesheet" href="../../include/bootstrap.min.css" type="text/css">
-<link rel="stylesheet" href="../../include/bootstrap-responsive.min.css" type="text/css">
+<link rel="stylesheet" href="../../include/bootstrap.min.css">
+<link rel="stylesheet" href="../../include/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../include/bootstrap-select.min.css">
 <link rel="stylesheet" href="../../include/style.css" type="text/css">
 <link rel="stylesheet" href="../../include/highlight.css" type="text/css">
 <meta charset="utf-8">
@@ -23,25 +24,18 @@
 <!-- Include main navigation -->
     <div class="masthead include" file="../../include/mainnav.html"></div>
         <div class="row">
-            <div class="text-left">
-                <div class="span2-doc" id="codeswitch"><div id="menutitle"><a href="gsp_jtv_design_dgw.html">View the help</a></div>
+            <div class="col-md-2" id="codeswitch"><div id="menutitle"><a href="gsp_jtv_design_dgw.html">View the help</a></div>
 </div>
-            </div>
-            <div class="text-right">
-                <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
-            </div>
+            <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
         </div>
         <div class="row">
-            <div class="row-fluid">
-                <div class="span2 span2-doc">
-                    <div class="include" file='../include/docnav.html'></div>
-                    <br/>
-
-                    <div id="seealso"><p></p></div>
-
-                    <br/>
-                </div>
-            <div class="span10 span10-doc">
+        <div class="col-md-2">
+                <div class="include" file='../include/docnav.html'></div>
+                <br/>
+                <div id="seealso"><p></p></div>
+                <br/>
+            </div>
+            <div class="col-md-10">
            
                     <h1 class="title">GSP_JTV_DESIGN_DGW - Design a dynamic graph wavelet with separable kernels</h1>
 <h2>Program code:</h2>
@@ -68,7 +62,7 @@
 <span class="c">%     (default 1)</span>
 <span class="c">%</span>
 <span class="c">%</span>
-<span class="c">%   Url: http://lts2research.epfl.ch/gsp/doc/filters/gsp_jtv_design_dgw.php</span>
+<span class="c">%   Url: https://epfl-lts2.github.io/gspbox-html/doc/filters/gsp_jtv_design_dgw.html</span>
 
 <span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
 <span class="c">% This file is part of GSPbox version 0.7.4</span>
@@ -146,9 +140,8 @@
     </div>
 </div>
 <!-- These two have to be here to dynamically load the included parts -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script
-src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js"></script>
+<script src="../../include/jquery.min.js"></script>
+<script src="../../include/bootstrap-select.min.js"></script>
 <script src="../../include/gspbox.js" type="text/javascript"></script>
 <script src="../include/lookup.js" type="text/javascript"></script>
 <script src="../include/jumplist.js" type="text/javascript"></script>

@@ -27,11 +27,11 @@ h2.titlepage {
 
 .logo { float: left; }
 h1.title { margin-bottom: 0; }
-.subtitle { font-size: medium;
+
+.subtitle { 
+  font-size: small;
   font-style: italic;
-  text-align: right;
-  width: 100%;
-  color: red;
+  text-align: left;
 }
 
 /* Custom container */
@@ -43,42 +43,68 @@ h1.title { margin-bottom: 0; }
   margin: 60px 0;
 }
 /* Customize the navbar links to be fill the entire space of the .navbar */
-.navbar .navbar-inner {
-  padding: 0;
+.nav-justified {
+    /*background-color: #eee;*/
+    border: 1px solid #d5d5d5;
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.nav-justified > li > a {
+    background-color: #f5f5f5;
+    background-repeat: repeat-x;
+    border-bottom: 1px solid #d5d5d5;
+    color: #777;
+    font-weight: bold;
+    margin-bottom: 0;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+.nav-justified > li > a:hover{
+    color: #222;
+}
 
+.nav-justified > .active > a,
+.nav-justified > .active > a:hover,
+.nav-justified > .active > a:focus {
+    color: #222;
+    background-image: none;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.15) inset;
 }
-.navbar .nav {
-  margin: 0;
-  display: table;
-  width: 100%;
+.nav-justified > li:first-child > a {
+    border-radius: 5px 5px 0 0;
 }
-.navbar .nav li {
-  display: table-cell;
-  width: 1%;
-  float: none;
+.nav-justified > li:last-child > a {
+    /*border-bottom: 0 none;*/
+    border-radius: 0 0 5px 5px;
 }
-.navbar .nav li a {
-  font-weight: bold;
-  text-align: center;
-  padding-right: 10px;
-  padding-left: 10px;
-  border-left: 1px solid rgba(255,255,255,.75);
-  border-right: 1px solid rgba(0,0,0,.1);
+@media (min-width: 768px) {
+.nav-justified {
+    max-height: 52px;
 }
-.navbar .nav > .active > a {
-  border-left: 1px solid rgba(222,222,222,.126);
+.nav-justified > li > a {
+    border-left: 1px solid #fff;
+    border-right: 1px solid #d5d5d5;
 }
-.navbar .nav li:first-child a {
-  border-left: 0;
-  border-radius: 3px 0 0 3px;
+.nav-justified > li:first-child > a {
+    border-left: 0 none;
+    border-radius: 5px 0 0 5px;
 }
-.navbar .nav li:last-child a {
-  border-right: 0;
-  border-radius: 0 3px 3px 0;
+.nav-justified > li:last-child > a {
+    border-radius: 0 5px 5px 0;
+    border-right: 0 none;
+}
 }
 /* Main marketing message and sign up button */
 .jumbotron {
-  margin: 80px 0;
+  margin: 0px 0px;
+  padding-top: 20px;
+  padding-bottom: 0px;
+  background-color: white;
   text-align: center;
 }
 .jumbotron h1 {
@@ -151,13 +177,7 @@ h1.title { margin-bottom: 0; }
 .doc-sidenav a:hover .icon-chevron-left {
   opacity: .5;
 }
-.doc-sidenav .active .icon-chevron-right,
-.doc-sidenav .active a:hover .icon-chevron-right,
-.doc-sidenav .active .icon-chevron-left,
-.doc-sidenav .active a:hover .icon-chevron-left {
-  background-image: url(../img/glyphicons-halflings-white.png);
-  opacity: 1;
-}
+
 .doc-sidenav.affix {
   top: 40px;
 }
@@ -184,12 +204,19 @@ h1.title { margin-bottom: 0; }
 .input-prepend form {
   margin-left: 0px;
 }
-select { 
+
+.input-group { 
+  height: 20px;
   width: 100%; 
-  float: right;
+/*  float: right;*/
 }
+
+.input-group-addon {
+  line-height: inherit;
+}
+
 .input-prepend .add-on {
-  float: left;
+  float: right;
   color: #555;
   min-width: 100px;
 }
@@ -238,10 +265,14 @@ table > hr {
 }
 
 .footer img {
-    height : 75px;
+    height : 120px;
+    padding: 20px;
 }
 
-
+.figure img{
+    width : 700px;
+    height : auto;
+  }
 
 /* Fix a problem with reStructuredText where nested environment had a
 larger fontsize. */
@@ -260,4 +291,16 @@ blockquote p { font-size: 100%; }
   font-size: 90%;
   margin-bottom: 0.5cm;
 
+}
+
+.docutils kbd {
+background-color: #fff;
+box-shadow: none;
+color: #333;    
+}
+
+
+code, kbd, pre, samp {
+    font-family: monospace,monospace;
+    font-size: 1em;
 }
