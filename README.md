@@ -1,4 +1,4 @@
-gspbpx-html
+gspbox-html
 -----------
 
 Locally, the pages should be browsed using some HTML server. 
