@@ -1,2 +1,2 @@
-# iters: 1000. Rel primal: 1.9827e-04 Rel dual: 9.2639e-06   4.140e+02
-Time needed is 0.760525 seconds
+# iters:  200. Rel primal: 3.4923e-03 Rel dual: 4.6112e-04   1.661e+03
+Time needed is 0.159397 seconds

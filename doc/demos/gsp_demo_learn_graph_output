@@ -1,13 +1,13 @@
 # iters: 3226. Rel primal: 3.0817e-06 Rel dual: 9.9911e-06  OBJ 1.171e+01
-Time needed is 0.730699 seconds
+Time needed is 0.538533 seconds
 # iters: 21427. Rel primal: 8.0025e-06 Rel dual: 9.9949e-06  OBJ -2.239e+02
-Time needed is 3.341434 seconds
+Time needed is 3.244091 seconds
 # iters: 1818. Rel primal: 5.9225e-06 Rel dual: 9.9869e-06  OBJ -9.442e+02
-Time needed is 0.277372 seconds
+Time needed is 0.271676 seconds
 # iters: 2173. Rel primal: 7.7403e-06 Rel dual: 9.9829e-06  OBJ -4.585e+01
-Time needed is 0.329630 seconds
+Time needed is 0.353892 seconds
 # iters:  754. Rel primal: 9.5232e-06 Rel dual: 9.9831e-06  OBJ -1.749e+02
-Time needed is 0.142212 seconds
+Time needed is 0.108587 seconds
 Graph of signal 1: 213  edges
 Graph of signal 2: 263  edges
 Graph of signal 3: 232  edges

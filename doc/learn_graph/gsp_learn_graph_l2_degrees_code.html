@@ -29,7 +29,7 @@
             <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
         </div>
         <div class="row">
-        <div class="col-md-2">
+            <div class="col-md-2">
                 <div class="include" file='../include/docnav.html'></div>
                 <br/>
                 <div id="seealso"><p></p></div>
@@ -107,6 +107,8 @@
 <span class="c">%    maxit           : Maximum number of iterations. Default: 1000</span>
 <span class="c">%    tol             : Tolerance for stopping criterion. Default: 1e-5</span>
 <span class="c">%    step_size       : Step size from the interval (0,1). Default: 0.5</span>
+<span class="c">%    fix_zeros       : Fix a set of edges to zero (true/false)</span>
+<span class="c">%    edge_mask       : Mask indicating the non zero edges if &quot;fix_zeros&quot;</span>
 <span class="c">%</span>
 <span class="c">%   The stopping criterion is whether both relative primal and dual</span>
 <span class="c">%   distance between two iterations are below a given tolerance. </span>
@@ -158,49 +160,94 @@
 <span class="c">% Date: June 2015</span>
 
 
-<span class="c">%% Default parameters</span>
 <span class="k">if</span> <span class="n">nargin</span> <span class="o">&lt;</span> <span class="mi">3</span>
     <span class="n">params</span> <span class="p">=</span> <span class="n">struct</span><span class="p">;</span>
 <span class="k">end</span>
 
+<span class="c">%% Default parameters</span>
 <span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;verbosity&#39;</span><span class="p">)),</span>   <span class="n">params</span><span class="p">.</span><span class="n">verbosity</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>   <span class="k">end</span>
-<span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;maxit&#39;</span><span class="p">)),</span>       <span class="n">params</span><span class="p">.</span><span class="n">maxit</span> <span class="p">=</span> <span class="mi">1000</span><span class="p">;</span>      <span class="k">end</span>
+<span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;maxit&#39;</span><span class="p">)),</span>       <span class="n">params</span><span class="p">.</span><span class="n">maxit</span> <span class="p">=</span> <span class="mi">200</span><span class="p">;</span>      <span class="k">end</span>
 <span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;tol&#39;</span><span class="p">)),</span>         <span class="n">params</span><span class="p">.</span><span class="n">tol</span> <span class="p">=</span> <span class="mf">1e-5</span><span class="p">;</span>      <span class="k">end</span>
 <span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;step_size&#39;</span><span class="p">)),</span>   <span class="n">params</span><span class="p">.</span><span class="n">step_size</span> <span class="p">=</span> <span class="p">.</span><span class="mi">5</span><span class="p">;</span>      <span class="k">end</span>     <span class="c">% from (0, 1)</span>
+<span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;fix_zeros&#39;</span><span class="p">)),</span>   <span class="n">params</span><span class="p">.</span><span class="n">fix_zeros</span> <span class="p">=</span> <span class="n">false</span><span class="p">;</span>   <span class="k">end</span>
+<span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;max_w&#39;</span><span class="p">)),</span>       <span class="n">params</span><span class="p">.</span><span class="n">max_w</span> <span class="p">=</span> <span class="nb">inf</span><span class="p">;</span>         <span class="k">end</span>
 
 
 <span class="c">%% Fix parameter size and initialize</span>
-<span class="n">z</span> <span class="p">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">Z</span><span class="p">);</span>
-<span class="n">z</span> <span class="p">=</span> <span class="n">full</span><span class="p">(</span><span class="n">z</span><span class="p">(:));</span>
+<span class="k">if</span> <span class="nb">isvector</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+    <span class="n">z</span> <span class="p">=</span> <span class="n">Z</span><span class="p">;</span>  <span class="c">% lazy copying of matlab doesn&#39;t allocate new memory for z</span>
+<span class="k">else</span>
+    <span class="n">z</span> <span class="p">=</span> <span class="n">squareform_sp</span><span class="p">(</span><span class="n">Z</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="n">z</span> <span class="p">=</span> <span class="n">z</span><span class="p">(:);</span>
 <span class="n">l</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">z</span><span class="p">);</span>                   <span class="c">% number of edges</span>
 <span class="c">% n(n-1)/2 = l =&gt; n = (1 + sqrt(1+8*l))/ 2</span>
 <span class="n">n</span> <span class="p">=</span> <span class="nb">round</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="nb">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">8</span><span class="o">*</span><span class="n">l</span><span class="p">))</span><span class="o">/</span> <span class="mi">2</span><span class="p">);</span>    <span class="c">% number of nodes</span>
 
-<span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;W_init&#39;</span><span class="p">)</span>
-    <span class="n">w</span> <span class="p">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">W_init</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span>
+<span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;w_0&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">))</span>
+        <span class="n">error</span><span class="p">(</span><span class="s">&#39;When params.w_0 is specified, params.c should also be specified&#39;</span><span class="p">);</span>
+    <span class="k">else</span>
+        <span class="n">c</span> <span class="p">=</span> <span class="n">params</span><span class="p">.</span><span class="n">c</span><span class="p">;</span>
+    <span class="k">end</span>
+    <span class="k">if</span> <span class="nb">isvector</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">w_0</span><span class="p">)</span>
+        <span class="n">w_0</span> <span class="p">=</span> <span class="n">params</span><span class="p">.</span><span class="n">w_0</span><span class="p">;</span>
+    <span class="k">else</span>
+        <span class="n">w_0</span> <span class="p">=</span> <span class="n">squareform_sp</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">w_0</span><span class="p">);</span>
+    <span class="k">end</span>
+    <span class="n">w_0</span> <span class="p">=</span> <span class="n">w_0</span><span class="p">(:);</span>
 <span class="k">else</span>
-    <span class="c">% w_0 = exp(-6*dx2/mean(dx2));</span>
-    <span class="n">w</span> <span class="p">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">z</span><span class="p">));</span>
+    <span class="n">w_0</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">c</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="k">end</span>
 
+<span class="c">% if sparsity pattern is fixed we optimize with respect to a smaller number</span>
+<span class="c">% of variables, all included in w</span>
+<span class="k">if</span> <span class="n">params</span><span class="p">.</span><span class="n">fix_zeros</span>
+    <span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="nb">isvector</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">edge_mask</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">.</span><span class="n">edge_mask</span> <span class="p">=</span> <span class="n">squareform_sp</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">edge_mask</span><span class="p">);</span>
+    <span class="k">end</span>
+    <span class="c">% use only the non-zero elements to optimize</span>
+    <span class="n">ind</span> <span class="p">=</span> <span class="nb">find</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">edge_mask</span><span class="p">(:));</span>
+    <span class="n">z</span> <span class="p">=</span> <span class="n">full</span><span class="p">(</span><span class="n">z</span><span class="p">(</span><span class="n">ind</span><span class="p">));</span>
+    <span class="k">if</span> <span class="n">not</span><span class="p">(</span><span class="nb">isscalar</span><span class="p">(</span><span class="n">w_0</span><span class="p">))</span>
+        <span class="n">w_0</span> <span class="p">=</span> <span class="n">full</span><span class="p">(</span><span class="n">w_0</span><span class="p">(</span><span class="n">ind</span><span class="p">));</span>
+    <span class="k">end</span>
+<span class="k">else</span>
+    <span class="n">z</span> <span class="p">=</span> <span class="n">full</span><span class="p">(</span><span class="n">z</span><span class="p">);</span>
+    <span class="n">w_0</span> <span class="p">=</span> <span class="n">full</span><span class="p">(</span><span class="n">w_0</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="n">w</span> <span class="p">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">z</span><span class="p">));</span>
+
+<span class="c">% number of edges over which we finally optimize (l2 &lt;= l)</span>
+<span class="n">l2</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>
+
+
 <span class="c">%% Needed operators</span>
+<span class="c">% S*w = sum(W)</span>
+<span class="k">if</span> <span class="n">params</span><span class="p">.</span><span class="n">fix_zeros</span>
+    <span class="p">[</span><span class="n">S</span><span class="p">,</span> <span class="n">St</span><span class="p">]</span> <span class="p">=</span> <span class="n">sum_squareform</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">params</span><span class="p">.</span><span class="n">edge_mask</span><span class="p">(:));</span>
+<span class="k">else</span>
+    <span class="p">[</span><span class="n">S</span><span class="p">,</span> <span class="n">St</span><span class="p">]</span> <span class="p">=</span> <span class="n">sum_squareform</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+<span class="k">end</span>
 
-<span class="c">% needed for gradient of h(w)</span>
-<span class="c">% L*w = sum(W)</span>
-<span class="p">[</span><span class="n">S</span><span class="p">,</span> <span class="n">St</span><span class="p">]</span> <span class="p">=</span> <span class="n">sum_squareform</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
-
-<span class="c">% ones_l = ones(l,1);</span>
+<span class="n">ones_l2</span> <span class="p">=</span> <span class="nb">ones</span><span class="p">(</span><span class="n">l2</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
 
 <span class="n">sum_op</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="n">S</span><span class="o">*</span><span class="n">w</span><span class="p">;</span>
 <span class="n">sum_t_op</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">)</span> <span class="n">St</span><span class="o">*</span><span class="n">z</span><span class="p">;</span>
-<span class="c">% edges -&gt; scalar</span>
-<span class="n">K_op</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="mi">2</span><span class="o">*</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>   <span class="c">% sum(sum(W)) = 2 * sum(w)</span>
-<span class="c">% scalar -&gt; edges</span>
-<span class="c">% Kt_op = @(z) 2 * z * ones_l;</span>
-<span class="n">norm_K</span> <span class="p">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">l</span><span class="p">);</span>
-<span class="c">%norm_L = l;         % do i need the square norm or the square root?</span>
 
-<span class="c">%% TODO: Rescaling??</span>
+<span class="c">% edges -&gt; scalar</span>
+<span class="n">K_op</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="mi">2</span><span class="o">*</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>
+
+<span class="c">% scalar -&gt; edges</span>
+<span class="n">Kt_op</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">)</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">z</span> <span class="o">*</span> <span class="n">ones_l2</span><span class="p">;</span>
+
+<span class="n">norm_K</span> <span class="p">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">l2</span><span class="p">);</span>
+<span class="c">%norm_L = l2;         % do i need the square norm or the square root?</span>
+
+<span class="c">%% TODO: Normalization??</span>
 
 <span class="c">%% Learn the graph</span>
 <span class="c">% min_{W&gt;=0}     tr(X&#39;*L*X) - gc * sum(log(sum(W))) + gp * norm(W-W0,&#39;fro&#39;)^2, where L = diag(sum(W))-W</span>
@@ -210,29 +257,40 @@
 <span class="c">% put proximal of trace plus positivity together</span>
 <span class="n">f</span><span class="p">.</span><span class="n">eval</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="mi">2</span><span class="o">*</span><span class="n">w</span><span class="o">&#39;*</span><span class="n">z</span><span class="p">;</span>    <span class="c">% half should be counted</span>
 <span class="c">%f.eval = @(W) 0;</span>
-<span class="n">f</span><span class="p">.</span><span class="n">prox</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">w</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">z</span><span class="p">);</span>  <span class="c">% all change the same</span>
+<span class="n">f</span><span class="p">.</span><span class="n">prox</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="n">min</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">max_w</span><span class="p">,</span> <span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">w</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">z</span><span class="p">));</span>  <span class="c">% all change the same</span>
 
 <span class="c">% projection of sum of W on n</span>
 <span class="c">% g(w) = IND(sum(w) == n)</span>
-<span class="n">g</span><span class="p">.</span><span class="n">eval</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">)</span> <span class="mi">10</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="o">-</span><span class="n">n</span><span class="p">);</span>  <span class="c">% this could be 0. Measures violation of the condition sum(w) = n!!</span>
+<span class="n">g</span><span class="p">.</span><span class="n">eval</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">)</span> <span class="mi">1000</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="o">-</span><span class="n">n</span><span class="p">);</span>  <span class="c">% this could be 0. Measures violation of the condition sum(w) = n!!</span>
 <span class="n">g</span><span class="p">.</span><span class="n">prox</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="n">n</span><span class="p">;</span>
 <span class="c">% proximal of conjugate of g: z - c*g.prox(z/c, 1/c)</span>
 <span class="n">g_star_prox</span> <span class="p">=</span> <span class="p">@(</span><span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="n">z</span> <span class="o">-</span> <span class="n">c</span><span class="o">*</span><span class="n">n</span><span class="p">;</span>
 
-<span class="c">% the following is the squared frobenius norm of the graph Laplacian</span>
-<span class="n">h</span><span class="p">.</span><span class="n">eval</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">norm</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>^<span class="mi">2</span> <span class="o">+</span> <span class="n">norm</span><span class="p">(</span><span class="n">sum_op</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>^<span class="mi">2</span><span class="p">);</span>   <span class="c">% CAREFUL: w two times!</span>
-<span class="n">h</span><span class="p">.</span><span class="n">grad</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="n">sum_t_op</span><span class="p">(</span><span class="n">sum_op</span><span class="p">(</span><span class="n">w</span><span class="p">)));</span>
-<span class="c">% if the next is wrong we don&#39;t converge for time_step != 0.5</span>
-<span class="n">h</span><span class="p">.</span><span class="nb">beta</span> <span class="p">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">));</span>    <span class="c">% = norm(ones(n)+eye(n)) = n+1</span>
-
-<span class="c">% TODO: best convergence when h.beta = 1 ?? then use rescaling!!</span>
-
+<span class="k">if</span> <span class="n">w_0</span> <span class="o">==</span> <span class="mi">0</span>
+	<span class="c">% &quot;if&quot; not needed, for c = 0 both are the same but gains speed</span>
+    <span class="c">% the following is half the squared frobenius norm of the graph Laplacian</span>
+    <span class="n">h</span><span class="p">.</span><span class="n">eval</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="n">a</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">norm</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>^<span class="mi">2</span> <span class="o">+</span> <span class="n">norm</span><span class="p">(</span><span class="n">sum_op</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>^<span class="mi">2</span><span class="p">);</span>   <span class="c">% CAREFUL: w two times!</span>
+    <span class="n">h</span><span class="p">.</span><span class="n">grad</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="n">sum_t_op</span><span class="p">(</span><span class="n">sum_op</span><span class="p">(</span><span class="n">w</span><span class="p">)));</span>
+    <span class="c">% = (a*2*I + a*St*S)*w</span>
+    <span class="c">% Lipschitz constant of h.grad:   a * norm(2*eye(n) + 2*ones(n))</span>
+    <span class="n">h</span><span class="p">.</span><span class="nb">beta</span> <span class="p">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">n</span><span class="p">;</span>    <span class="c">% a*2 + a*(2*(n-1))</span>
+    <span class="c">% = normest(a * (2*speye(l) + sum_t_op(sum_op(speye(l)))));</span>
+<span class="k">else</span>
+    <span class="c">% the following is half the squared frobenius norm of the graph Laplacian</span>
+    <span class="n">h</span><span class="p">.</span><span class="n">eval</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="n">a</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">norm</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>^<span class="mi">2</span> <span class="o">+</span> <span class="n">norm</span><span class="p">(</span><span class="n">sum_op</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>^<span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">c</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">norm</span><span class="p">(</span><span class="n">w</span><span class="o">-</span><span class="n">w_0</span><span class="p">));</span>   <span class="c">% CAREFUL: norm(W, &#39;fro&#39;) = 2*norm(w) two times!</span>
+    <span class="n">h</span><span class="p">.</span><span class="n">grad</span> <span class="p">=</span> <span class="p">@(</span><span class="n">w</span><span class="p">)</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="n">sum_t_op</span><span class="p">(</span><span class="n">sum_op</span><span class="p">(</span><span class="n">w</span><span class="p">)))</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">w</span><span class="o">-</span><span class="n">w_0</span><span class="p">);</span>
+    <span class="c">% = (a*2*I + a*St*S + c*2*I)*w  +  const(w)</span>
+    <span class="c">% Lipschitz constant of h.grad:   norm(2*a*eye(n) + 2*a*ones(n) + 2*c*eye(n))</span>
+    <span class="n">h</span><span class="p">.</span><span class="nb">beta</span> <span class="p">=</span> <span class="n">a</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">c</span><span class="p">);</span>    <span class="c">% norm(ones(n) + c*eye(n)) = n+c</span>
+<span class="k">end</span>    
+    
+    
 <span class="c">% if there is no quadratic term, it reduces to a linear program:</span>
-<span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">w_0</span> <span class="o">==</span> <span class="mi">0</span>
     <span class="c">%   X =     linprog(f,   A,   b,   Aeq,           beq,LB,UB,X0)</span>
     <span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">fval</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">exitflag</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">output</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">lambda</span><span class="p">]</span> <span class="p">=</span> <span class="n">linprog</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="nb">ones</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">z</span><span class="p">))</span><span class="o">&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="nb">zeros</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">z</span><span class="p">)));</span>
 <span class="k">else</span>
-    <span class="c">%% My custom FBF based primal dual (see [Komodakis, Pesquet])</span>
+    <span class="c">%% My custom FBF based primal dual (see [1] = [Komodakis, Pesquet])</span>
     <span class="c">% parameters mu, epsilon for convergence (see [1])</span>
     <span class="n">mu</span> <span class="p">=</span> <span class="n">h</span><span class="p">.</span><span class="nb">beta</span> <span class="o">+</span> <span class="n">norm_K</span><span class="p">;</span>     <span class="c">%TODO: is it squared or not??</span>
     <span class="n">epsilon</span> <span class="p">=</span> <span class="n">lin_map</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">mu</span><span class="p">)],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]);</span>   <span class="c">% in (0, 1/(1+mu) )</span>
@@ -280,11 +338,7 @@
             <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;iter %4d: %6.4e   %6.4e\n&#39;</span><span class="p">,</span> <span class="nb">i</span><span class="p">,</span> <span class="n">rel_norm_primal</span><span class="p">,</span> <span class="n">rel_norm_dual</span><span class="p">);</span>
         <span class="k">end</span>
         
-        <span class="k">if</span> <span class="nb">i</span> <span class="o">&lt;</span><span class="p">=</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">isfield</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s">&#39;W_init&#39;</span><span class="p">)</span> 
-            <span class="n">w</span> <span class="p">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="n">W_init</span><span class="p">)</span><span class="o">&#39;</span><span class="p">;</span>
-        <span class="k">else</span>
-            <span class="n">w</span> <span class="p">=</span> <span class="n">w</span> <span class="o">-</span> <span class="n">Y_n</span> <span class="o">+</span> <span class="n">Q_n</span><span class="p">;</span>
-        <span class="k">end</span>
+        <span class="n">w</span> <span class="p">=</span> <span class="n">w</span> <span class="o">-</span> <span class="n">Y_n</span> <span class="o">+</span> <span class="n">Q_n</span><span class="p">;</span>
         <span class="n">v_n</span> <span class="p">=</span> <span class="n">v_n</span> <span class="o">-</span> <span class="n">y_n</span> <span class="o">+</span> <span class="n">q_n</span><span class="p">;</span>
         
         <span class="k">if</span> <span class="n">rel_norm_primal</span> <span class="o">&lt;</span> <span class="n">params</span><span class="p">.</span><span class="n">tol</span> <span class="o">&amp;&amp;</span> <span class="n">rel_norm_dual</span> <span class="o">&lt;</span> <span class="n">params</span><span class="p">.</span><span class="n">tol</span>
@@ -296,12 +350,12 @@
         <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;# iters: %4d. Rel primal: %6.4e Rel dual: %6.4e   %6.3e\n&#39;</span><span class="p">,</span> <span class="nb">i</span><span class="p">,</span> <span class="n">rel_norm_primal</span><span class="p">,</span> <span class="n">rel_norm_dual</span><span class="p">,</span> <span class="n">f</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">K_op</span><span class="p">(</span><span class="n">w</span><span class="p">))</span> <span class="o">+</span> <span class="n">h</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">w</span><span class="p">));</span>
         <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Time needed is %f seconds\n&#39;</span><span class="p">,</span> <span class="n">stat</span><span class="p">.</span><span class="n">time</span><span class="p">);</span>
     <span class="k">end</span>
-    
-    <span class="c">% Use the following for testing:</span>
-    <span class="c">%     g.L = K_op;</span>
-    <span class="c">%     g.Lt = Kt_op;</span>
-    <span class="c">%     g.norm_L = norm_K;</span>
-    <span class="c">%     [w, info] = fbf_primal_dual(w, f, g, h, params);</span>
+
+<span class="c">% Use the following for testing:</span>
+<span class="c">%     g.L = K_op;</span>
+<span class="c">%     g.Lt = Kt_op;</span>
+<span class="c">%     g.norm_L = norm_K;</span>
+<span class="c">%     [w, info] = fbf_primal_dual(w, f, g, h, params);</span>
     <span class="c">%[w, info] = fb_based_primal_dual(w, f, g, h, params);</span>
     <span class="c">%%</span>
     
@@ -312,7 +366,15 @@
     <span class="k">end</span>
 <span class="k">end</span>
 
-<span class="n">W</span> <span class="p">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>
+<span class="k">if</span> <span class="n">params</span><span class="p">.</span><span class="n">fix_zeros</span>
+    <span class="n">w</span> <span class="p">=</span> <span class="n">sparse</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">ones</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">ind</span><span class="p">)),</span> <span class="n">w</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="k">end</span>
+
+<span class="k">if</span> <span class="nb">isvector</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+    <span class="n">W</span> <span class="p">=</span> <span class="n">w</span><span class="p">;</span>
+<span class="k">else</span>
+    <span class="n">W</span> <span class="p">=</span> <span class="n">squareform_sp</span><span class="p">(</span><span class="n">w</span><span class="p">);</span>
+<span class="k">end</span>
 </pre></div>
 
 

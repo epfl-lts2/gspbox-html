@@ -28,6 +28,7 @@ var globalfunlist = {
    gsp_demo_graph_embedding:'demos/gsp_demo_graph_embedding',
    gsp_demo_graph_tv:'demos/gsp_demo_graph_tv',
    gsp_demo_learn_graph:'demos/gsp_demo_learn_graph',
+   gsp_demo_learn_graph_large:'demos/gsp_demo_learn_graph_large',
    gsp_demo_pyramid:'demos/gsp_demo_pyramid',
    gsp_demo_stationarity:'demos/gsp_demo_stationarity',
    gsp_demo_wavelet:'demos/gsp_demo_wavelet',

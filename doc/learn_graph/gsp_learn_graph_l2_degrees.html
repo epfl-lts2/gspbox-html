@@ -29,7 +29,7 @@
             <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
         </div>
         <div class="row">
-        <div class="col-md-2">
+            <div class="col-md-2">
                 <div class="include" file='../include/docnav.html'></div>
                 <br/>
                 <div id="seealso"><p></p></div>
@@ -110,8 +110,8 @@ figure; gsp_plot_graph(G2); title('Graph with edges learned from above 4 signals
 </pre>
 <p><em>This code produces the following output</em>:</p>
 <pre class="literal-block">
-# iters: 1000. Rel primal: 1.9827e-04 Rel dual: 9.2639e-06   4.140e+02
-Time needed is 0.760525 seconds
+# iters:  200. Rel primal: 3.4923e-03 Rel dual: 4.6112e-04   1.661e+03
+Time needed is 0.159397 seconds
 </pre>
 <img alt="gsp_learn_graph_l2_degrees_1_1.png" class="align-center" src="gsp_learn_graph_l2_degrees_1_1.png" />
 <img alt="gsp_learn_graph_l2_degrees_1_2.png" class="align-center" src="gsp_learn_graph_l2_degrees_1_2.png" />
@@ -124,6 +124,8 @@ Time needed is 0.760525 seconds
 <li><em>maxit</em>           : Maximum number of iterations. Default: 1000</li>
 <li><em>tol</em>             : Tolerance for stopping criterion. Default: 1e-5</li>
 <li><em>step_size</em>       : Step size from the interval (0,1). Default: 0.5</li>
+<li><em>fix_zeros</em>       : Fix a set of edges to zero (true/false)</li>
+<li><em>edge_mask</em>       : Mask indicating the non zero edges if &quot;fix_zeros&quot;</li>
 </ul>
 <p>The stopping criterion is whether both relative primal and dual
 distance between two iterations are below a given tolerance.</p>

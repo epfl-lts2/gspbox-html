@@ -1,0 +1,265 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head class="include" file="../../include/header.html">
+<link rel="stylesheet" href="../../include/bootstrap.min.css">
+<link rel="stylesheet" href="../../include/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../include/bootstrap-select.min.css">
+<link rel="stylesheet" href="../../include/style.css" type="text/css">
+<link rel="stylesheet" href="../../include/highlight.css" type="text/css">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta NAME="keywords" CONTENT="graph signal processing, graphs, filters, graph filters, signal processing, matlab,documentation"/>
+
+<title>GSP_DEMO_LEARN_GRAPH_LARGE - Tutorial for graph learning using the GSPBox</title>
+</head>
+
+
+
+<!-- body must stay hidden until all include parts are loaded -->
+<body style="display:none;">
+<!-- Wrap the content into responsive container -->
+<div class="container">
+<!-- Include main navigation -->
+    <div class="masthead include" file="../../include/mainnav.html"></div>
+        <div class="row">
+            <div class="col-md-2" id="codeswitch"><div id="menutitle"><a href="gsp_demo_learn_graph_large_code.html">View the code</a></div>
+</div>
+            <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="include" file='../include/docnav.html'></div>
+                <br/>
+                <div id="seealso"><p></p></div>
+                <br/>
+            </div>
+            <div class="col-md-10">
+           
+                    <h1 class="title">GSP_DEMO_LEARN_GRAPH_LARGE - Tutorial for graph learning using the GSPBox</h1>
+<h2 class="subtitle" id="xxxdescription">Description</h2>
+
+<p>This is a graph learning tutorial using GSP box. It deals with most
+aspects needed to know in order to use graph learning:</p>
+<ol class="arabic simple">
+<li>standard graph learning [1, Kalofolias 2016]</li>
+<li>setting params automatically for given sparsity [2, Kalofolias, Perraudin 2017]</li>
+<li>setting zero-edges up-front [2, Kalofolias, Perraudin 2017]</li>
+<li>large scale graph learning [2, Kalofolias, Perraudin 2017]</li>
+</ol>
+<p>Let's create some artificial coordinates data:</p>
+<pre class="literal-block">
+gsp_reset_seed(1);
+G = gsp_2dgrid(16);
+n = G.N;
+W0 = G.W;
+G = gsp_graph(G.W, G.coords+.05*rand(size(G.coords)));
+figure; gsp_plot_graph(G);
+</pre>
+<div class="figure align-center">
+<img alt="gsp_demo_learn_graph_large_1.png" src="gsp_demo_learn_graph_large_1.png" />
+<p class="caption">Artificial data</p>
+</div>
+<p>Now suppose our data is the coordinates (x, y) of the points in space.
+Note that the data could often be a signal on these points, for example
+see <span class="linkrole"><a href="#BASEURL#/doc/demos/gsp_demo_learn_graph.html">gsp_demo_learn_graph</a></span></p>
+<pre class="literal-block">
+X = G.coords';
+</pre>
+<p>Right now the weights matrix W is all zeros and ones, but let's make it
+follow the geometry by learning weights from the new coordinates:</p>
+<pre class="literal-block">
+% First compute the matrix of all pairwise distances Z
+Z = gsp_distanz(X).^2;
+% this is a highly dense matrix
+figure; imagesc(Z);
+% Let's learn a graph, we need to know two parameters a and b according to
+% [1, Kalofolias, 2016]
+a = 1;
+b = 1;
+W = gsp_learn_graph_log_degrees(Z, a, b);
+% this matrix is naturally sparse, but still has many connections unless we
+% &quot;play&quot; with the parameters a and b to make it sparser
+figure; imagesc(W);
+% update weights
+W(W&lt;1e-4) = 0;
+G = gsp_update_weights(G, W);
+</pre>
+<div class="figure align-center">
+<img alt="gsp_demo_learn_graph_large_2.png" src="gsp_demo_learn_graph_large_2.png" />
+<p class="caption">Distance matrix</p>
+</div>
+<div class="figure align-center">
+<img alt="gsp_demo_learn_graph_large_3.png" src="gsp_demo_learn_graph_large_3.png" />
+<p class="caption">Learned weights using <span class="math">\(a=1\)</span> and <span class="math">\(b=1\)</span></p>
+</div>
+<p>A practical way of setting parameters is explained in our last
+publication [2, Kalofolias, Perraudin 2017]. Instead of setting a and
+b, we need one parameter theta changing sparsity. An automatic way to
+find a good approximation given a desired sparsity level is with
+function gsp_compute_graph_learning_theta</p>
+<pre class="literal-block">
+% suppose we want 4 edges per node on average
+k = 4;
+theta = gsp_compute_graph_learning_theta(Z, k);
+% then instead of playing with a and b, we k keep them equal to 1 and
+% multiply Z by theta for graph learning:
+t1 = tic;
+[W, info_1] = gsp_learn_graph_log_degrees(theta * Z, 1, 1);
+t1 = toc(t1);
+% clean edges close to zero
+W(W&lt;1e-4) = 0;
+% indeed, the new adjacency matrix has around 4 non zeros per row!
+figure; imagesc(W); title(['Average edges/node: ', num2str(nnz(W)/G.N)]);
+% update weights and plot
+G = gsp_update_weights(G, W);
+figure; gsp_plot_graph(G);
+</pre>
+<div class="figure align-center">
+<img alt="gsp_demo_learn_graph_large_4.png" src="gsp_demo_learn_graph_large_4.png" />
+<p class="caption">Learned weights using automatique parameter selection</p>
+</div>
+<div class="figure align-center">
+<img alt="gsp_demo_learn_graph_large_5.png" src="gsp_demo_learn_graph_large_5.png" />
+<p class="caption">Learned graph using automatique parameter selection</p>
+</div>
+<p>An interesting feature is that we can give a pattern of allowed edges,
+keeping all the others to zero. This is important to add contstraints
+to some problems, or just to reduce computations for others:</p>
+<pre class="literal-block">
+% Suppose for example that we know beforehand that no connection could or
+% should be formed before pairs of nodes with distance more than 0.15. We
+% create a mask with the pattern of allowed edges and pass it to the
+% learning algorithm in a parameters structure:
+params.edge_mask = zero_diag(Z &lt; 0.02);
+% we also set the flag fix_zeros to 1:
+params.fix_zeros = 1;
+[W2, info_2] = gsp_learn_graph_log_degrees(theta * Z, 1, 1, params);
+% clean edges close to zero
+W2(W2&lt;1e-4) = 0;
+% indeed, the new adjacency matrix has around 4 non zeros per row!
+figure; imagesc(W2); title(['Average edges/node: ', num2str(nnz(W2)/G.N)]);
+% update weights and plot
+G = gsp_update_weights(G, W2);
+figure; gsp_plot_graph(G);
+fprintf('The computation was %.1f times faster than before!\n', info_1.time / info_2.time);
+fprintf('Relative difference between two solutions: %.4f\n', norm(W-W2, 'fro')/norm(W, 'fro'));
+% Note that the learned graph is sparser than the mask we gave as input.
+figure; subplot(1, 2, 1); spy(W2); title('W_2'); subplot(1, 2, 2), spy(params.edge_mask); title('edge mask');
+</pre>
+<div class="figure align-center">
+<img alt="gsp_demo_learn_graph_large_6.png" src="gsp_demo_learn_graph_large_6.png" />
+<p class="caption">Learned weights using a pattern of allowed edges</p>
+</div>
+<div class="figure align-center">
+<img alt="gsp_demo_learn_graph_large_7.png" src="gsp_demo_learn_graph_large_7.png" />
+<p class="caption">Learned graph using a pattern of allowed edges</p>
+</div>
+<div class="figure align-center">
+<img alt="gsp_demo_learn_graph_large_8.png" src="gsp_demo_learn_graph_large_8.png" />
+<p class="caption">Edges selected by the algorithm</p>
+</div>
+<p>Actually this feature is the one that allows us to work with big data.
+Suppose the graph has n nodes. Classical graph learning [1, Kalofolias
+2016] costs O(n^2) computations. If the mask we give has O(n) edges,
+then the computation drops to O(n) as well. The question is, how can we
+compute efficiently a mask of O(n) allowed edges for general data, even
+if we don't have prior knowledge? Note that computing the full matrix Z
+already costs O(n^2) and we want to avoid it! The solution is
+Approximate Nearest Neighbors (ANN) that computes an approximate sparse
+matrix Z with much less computations, roughly O(nlog(n)). This is the
+idea behind [2, Kalofolias, Perraudin 2017]</p>
+<pre class="literal-block">
+% We compute an approximate Nearest Neighbors graph (using the FLANN
+% library through GSP-box)
+params_NN.use_flann = 1;
+% we ask for an approximate k-NN graph with roughly double number of edges.
+% The +1 is because FLANN also counts each node as its own neighbor.
+params_NN.k = 2 * k + 1;
+clock_flann = tic;
+[indx, indy, dist, ~, ~, ~, NN, Z_sorted] = gsp_nn_distanz(X, X, params_NN);
+time_flann = toc(clock_flann);
+fprintf('Time for FLANN: %.3f seconds\n', toc(clock_flann));
+% gsp_nn_distanz gives distance matrix in a form ready to use with sparse:
+Z_sp = sparse(indx, indy, dist.^2, n, n, params_NN.k * n * 2);
+% symmetrize the distance matrix
+Z_sp = gsp_symmetrize(Z_sp, 'full');
+% get rid or first row that is zero (each node has 0 distance from itself)
+Z_sorted = Z_sorted(:, 2:end).^2;   % first row is zero
+% Note that FLANN returns Z already sorted, that further saves computation
+% for computing the parameter theta.
+Z_is_sorted = true;
+theta = gsp_compute_graph_learning_theta(Z_sorted, k, 0, Z_is_sorted);
+params.edge_mask = Z_sp &gt; 0;
+params.fix_zeros = 1;
+[W3, info_3] = gsp_learn_graph_log_degrees(Z_sp * theta, 1, 1, params);
+W3(W3&lt;1e-4) = 0;
+fprintf('Relative difference between two solutions: %.4f\n', norm(W-W2, 'fro')/norm(W, 'fro'));
+% Note that the learned graph is sparser than the mask we gave as input.
+figure; subplot(1, 2, 1); spy(W3); title('W_3'); subplot(1, 2, 2), spy(params.edge_mask); title('edge mask');
+</pre>
+<div class="figure align-center">
+<img alt="gsp_demo_learn_graph_large_9.png" src="gsp_demo_learn_graph_large_9.png" />
+<p class="caption">Edges selected by the algorithm</p>
+</div>
+<p>Note that we can alternatively use the vector form of Z, W, and the
+mask, but always AFTER symmetrizing the distance matrix Z. Make sure
+you use our squareform_sp.m instead of Matlab's native squareform.m, or
+for big graphs you might have memory issues:</p>
+<pre class="literal-block">
+z_sp = squareform_sp(Z_sp);
+params.edge_mask = z_sp &gt; 0;
+% the output will be also in vectorform if the distances were in vectorform
+[w3, info_3_sp] = gsp_learn_graph_log_degrees(z_sp * theta, 1, 1, params);
+w3(w3&lt;1e-4) = 0;
+norm(w3 - squareform_sp(W3)) / norm(w3)
+</pre>
+<p><em>This code produces the following output</em>:</p>
+<pre class="literal-block">
+# iters:  191. Rel primal: 9.8352e-06 Rel dual: 3.5942e-08  OBJ -3.139e+02
+Time needed is 0.151721 seconds
+# iters:  270. Rel primal: 9.9610e-06 Rel dual: 7.6356e-06  OBJ 1.462e+02
+Time needed is 0.264097 seconds
+# iters:  100. Rel primal: 9.5222e-06 Rel dual: 7.8284e-06  OBJ 1.462e+02
+Time needed is 0.014817 seconds
+The computation was 17.8 times faster than before!
+Relative difference between two solutions: 0.0003
+Time for FLANN: 0.154 seconds
+[Warning: NORMEST did not converge for 100 iterations with tolerance 1e-06]
+[&gt; In normest (line 44)
+  In gsp_learn_graph_log_degrees (line 188)
+  In plotexec (line 353)]
+# iters:   87. Rel primal: 9.5602e-06 Rel dual: 7.7998e-06  OBJ 1.462e+02
+Time needed is 0.013805 seconds
+Relative difference between two solutions: 0.0003
+[Warning: NORMEST did not converge for 100 iterations with tolerance 1e-06]
+[&gt; In normest (line 44)
+  In gsp_learn_graph_log_degrees (line 188)
+  In plotexec (line 370)]
+# iters:   87. Rel primal: 9.5602e-06 Rel dual: 7.7998e-06  OBJ 1.462e+02
+Time needed is 0.010729 seconds
+
+ans =
+
+     0
+</pre>
+
+            </div>
+        </div>
+
+        <div class="include" file="../../include/footer.html"></div>
+    </div>
+</div>
+<!-- These two have to be here to dynamically load the included parts -->
+<script src="../../include/jquery.min.js"></script>
+<script src="../../include/bootstrap-select.min.js"></script>
+<script src="../../include/gspbox.js" type="text/javascript"></script>
+<script src="../include/lookup.js" type="text/javascript"></script>
+<script src="../include/jumplist.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+
