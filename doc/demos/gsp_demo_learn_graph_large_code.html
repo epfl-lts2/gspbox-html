@@ -44,10 +44,10 @@
 <span class="c">%   This is a graph learning tutorial using GSP box. It deals with most</span>
 <span class="c">%   aspects needed to know in order to use graph learning:</span>
 <span class="c">%</span>
-<span class="c">%   1) standard graph learning [1, Kalofolias 2016]</span>
-<span class="c">%   2) setting params automatically for given sparsity [2, Kalofolias, Perraudin 2017]</span>
-<span class="c">%   3) setting zero-edges up-front [2, Kalofolias, Perraudin 2017]</span>
-<span class="c">%   4) large scale graph learning [2, Kalofolias, Perraudin 2017]</span>
+<span class="c">%   1) standard graph learning [Kalofolias 2016]</span>
+<span class="c">%   2) setting params automatically for given sparsity [Kalofolias, Perraudin 2017]</span>
+<span class="c">%   3) setting zero-edges up-front [Kalofolias, Perraudin 2017]</span>
+<span class="c">%   4) large scale graph learning [ Kalofolias, Perraudin 2017]</span>
 <span class="c">%</span>
 <span class="c">%   Let&#39;s create some artificial coordinates data:</span>
 <span class="c">%</span>
@@ -163,7 +163,7 @@
 <span class="c">%</span>
 <span class="c">%</span>
 <span class="c">%   Actually this feature is the one that allows us to work with big data.</span>
-<span class="c">%   Suppose the graph has n nodes. Classical graph learning [1, Kalofolias</span>
+<span class="c">%   Suppose the graph has n nodes. Classical graph learning [Kalofolias</span>
 <span class="c">%   2016] costs O(n^2) computations. If the mask we give has O(n) edges,</span>
 <span class="c">%   then the computation drops to O(n) as well. The question is, how can we</span>
 <span class="c">%   compute efficiently a mask of O(n) allowed edges for general data, even</span>
@@ -171,7 +171,7 @@
 <span class="c">%   already costs O(n^2) and we want to avoid it! The solution is</span>
 <span class="c">%   Approximate Nearest Neighbors (ANN) that computes an approximate sparse</span>
 <span class="c">%   matrix Z with much less computations, roughly O(nlog(n)). This is the</span>
-<span class="c">%   idea behind [2, Kalofolias, Perraudin 2017] :</span>
+<span class="c">%   idea behind [Kalofolias, Perraudin 2017] :</span>
 <span class="c">%</span>
 <span class="c">%         % We compute an approximate Nearest Neighbors graph (using the FLANN</span>
 <span class="c">%         % library through GSP-box)</span>
@@ -217,7 +217,10 @@
 <span class="c">%         w3(w3&lt;1e-4) = 0;</span>
 <span class="c">%         norm(w3 - squareform_sp(W3)) / norm(w3)</span>
 <span class="c">%</span>
-<span class="c">%   See also: demo_learn_graph</span>
+<span class="c">%   Enjoy!</span>
+<span class="c">%</span>
+<span class="c">%   See also: gsp_demo_learn_graph</span>
+<span class="c">%</span>
 <span class="c">%   References:</span>
 <span class="c">%     V. Kalofolias. How to learn a graph from smooth signals. Technical</span>
 <span class="c">%     report, AISTATS 2016: proceedings at Journal of Machine Learning</span>

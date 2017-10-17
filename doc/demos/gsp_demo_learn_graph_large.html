@@ -43,10 +43,10 @@
 <p>This is a graph learning tutorial using GSP box. It deals with most
 aspects needed to know in order to use graph learning:</p>
 <ol class="arabic simple">
-<li>standard graph learning [1, Kalofolias 2016]</li>
-<li>setting params automatically for given sparsity [2, Kalofolias, Perraudin 2017]</li>
-<li>setting zero-edges up-front [2, Kalofolias, Perraudin 2017]</li>
-<li>large scale graph learning [2, Kalofolias, Perraudin 2017]</li>
+<li>standard graph learning [Kalofolias 2016]</li>
+<li>setting params automatically for given sparsity [Kalofolias, Perraudin 2017]</li>
+<li>setting zero-edges up-front [Kalofolias, Perraudin 2017]</li>
+<li>large scale graph learning [ Kalofolias, Perraudin 2017]</li>
 </ol>
 <p>Let's create some artificial coordinates data:</p>
 <pre class="literal-block">
@@ -161,7 +161,7 @@ figure; subplot(1, 2, 1); spy(W2); title('W_2'); subplot(1, 2, 2), spy(params.ed
 <p class="caption">Edges selected by the algorithm</p>
 </div>
 <p>Actually this feature is the one that allows us to work with big data.
-Suppose the graph has n nodes. Classical graph learning [1, Kalofolias
+Suppose the graph has n nodes. Classical graph learning [Kalofolias
 2016] costs O(n^2) computations. If the mask we give has O(n) edges,
 then the computation drops to O(n) as well. The question is, how can we
 compute efficiently a mask of O(n) allowed edges for general data, even
@@ -169,7 +169,7 @@ if we don't have prior knowledge? Note that computing the full matrix Z
 already costs O(n^2) and we want to avoid it! The solution is
 Approximate Nearest Neighbors (ANN) that computes an approximate sparse
 matrix Z with much less computations, roughly O(nlog(n)). This is the
-idea behind [2, Kalofolias, Perraudin 2017]</p>
+idea behind [Kalofolias, Perraudin 2017]</p>
 <pre class="literal-block">
 % We compute an approximate Nearest Neighbors graph (using the FLANN
 % library through GSP-box)
@@ -215,6 +215,7 @@ params.edge_mask = z_sp &gt; 0;
 w3(w3&lt;1e-4) = 0;
 norm(w3 - squareform_sp(W3)) / norm(w3)
 </pre>
+<p>Enjoy!</p>
 <p><em>This code produces the following output</em>:</p>
 <pre class="literal-block">
 # iters:  191. Rel primal: 9.8352e-06 Rel dual: 3.5942e-08  OBJ -3.139e+02
@@ -236,6 +237,28 @@ ans =
 
      0
 </pre>
+<H2>References:</H2>
+
+
+
+<p><a name="kalofolias2016learn"></a>
+
+V.&nbsp;Kalofolias.
+ How to learn a graph from smooth signals.
+ Technical report, AISTATS 2016: proceedings at Journal of Machine
+  Learning Research (JMLR)., 2016.
+
+</p>
+
+<p><a name="kalofolias2017large"></a>
+
+V.&nbsp;Kalofolias and N.&nbsp;Perraudin.
+ Large Scale Graph Learning from Smooth Signals.
+ <em>arXiv preprint arXiv:1710.05654</em>, 2017.
+[&nbsp;<a href="https://arxiv.org/pdf/1710.05654.pdf">.pdf</a>&nbsp;]
+
+</p>
+
 
             </div>
         </div>
