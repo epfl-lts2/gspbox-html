@@ -46,7 +46,7 @@ aspects needed to know in order to use graph learning:</p>
 <li>standard graph learning [Kalofolias 2016]</li>
 <li>setting params automatically for given sparsity [Kalofolias, Perraudin 2017]</li>
 <li>setting zero-edges up-front [Kalofolias, Perraudin 2017]</li>
-<li>large scale graph learning [ Kalofolias, Perraudin 2017]</li>
+<li>large scale graph learning [Kalofolias, Perraudin 2017]</li>
 </ol>
 <p>Let's create some artificial coordinates data:</p>
 <pre class="literal-block">
@@ -118,18 +118,18 @@ figure; gsp_plot_graph(G);
 </pre>
 <div class="figure align-center">
 <img alt="gsp_demo_learn_graph_large_4.png" src="gsp_demo_learn_graph_large_4.png" />
-<p class="caption">Learned weights using automatique parameter selection</p>
+<p class="caption">Learned weights using automatic parameter selection</p>
 </div>
 <div class="figure align-center">
 <img alt="gsp_demo_learn_graph_large_5.png" src="gsp_demo_learn_graph_large_5.png" />
-<p class="caption">Learned graph using automatique parameter selection</p>
+<p class="caption">Learned graph using automatic parameter selection</p>
 </div>
 <p>An interesting feature is that we can give a pattern of allowed edges,
 keeping all the others to zero. This is important to add contstraints
 to some problems, or just to reduce computations for others:</p>
 <pre class="literal-block">
 % Suppose for example that we know beforehand that no connection could or
-% should be formed before pairs of nodes with distance more than 0.15. We
+% should be formed before pairs of nodes with distance more than 0.02. We
 % create a mask with the pattern of allowed edges and pass it to the
 % learning algorithm in a parameters structure:
 params.edge_mask = zero_diag(Z &lt; 0.02);
@@ -205,8 +205,8 @@ figure; subplot(1, 2, 1); spy(W3); title('W_3'); subplot(1, 2, 2), spy(params.ed
 </div>
 <p>Note that we can alternatively use the vector form of Z, W, and the
 mask, but always AFTER symmetrizing the distance matrix Z. Make sure
-you use our squareform_sp.m instead of Matlab's native squareform.m, or
-for big graphs you might have memory issues:</p>
+you use our sparse version squareform_sp.m instead of Matlab's native
+squareform.m, or for big graphs you might have memory issues:</p>
 <pre class="literal-block">
 z_sp = squareform_sp(Z_sp);
 params.edge_mask = z_sp &gt; 0;

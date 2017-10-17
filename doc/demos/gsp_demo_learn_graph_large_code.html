@@ -47,7 +47,7 @@
 <span class="c">%   1) standard graph learning [Kalofolias 2016]</span>
 <span class="c">%   2) setting params automatically for given sparsity [Kalofolias, Perraudin 2017]</span>
 <span class="c">%   3) setting zero-edges up-front [Kalofolias, Perraudin 2017]</span>
-<span class="c">%   4) large scale graph learning [ Kalofolias, Perraudin 2017]</span>
+<span class="c">%   4) large scale graph learning [Kalofolias, Perraudin 2017]</span>
 <span class="c">%</span>
 <span class="c">%   Let&#39;s create some artificial coordinates data:</span>
 <span class="c">%</span>
@@ -118,11 +118,11 @@
 <span class="c">%         figure; gsp_plot_graph(G);</span>
 <span class="c">%</span>
 <span class="c">%</span>
-<span class="c">%   Figure 4: Learned weights using automatique parameter selection</span>
+<span class="c">%   Figure 4: Learned weights using automatic parameter selection</span>
 <span class="c">%</span>
 <span class="c">% </span>
 <span class="c">%</span>
-<span class="c">%   Figure 5: Learned graph using automatique parameter selection</span>
+<span class="c">%   Figure 5: Learned graph using automatic parameter selection</span>
 <span class="c">%</span>
 <span class="c">%</span>
 <span class="c">%</span>
@@ -131,7 +131,7 @@
 <span class="c">%   to some problems, or just to reduce computations for others:</span>
 <span class="c">% </span>
 <span class="c">%         % Suppose for example that we know beforehand that no connection could or</span>
-<span class="c">%         % should be formed before pairs of nodes with distance more than 0.15. We</span>
+<span class="c">%         % should be formed before pairs of nodes with distance more than 0.02. We</span>
 <span class="c">%         % create a mask with the pattern of allowed edges and pass it to the</span>
 <span class="c">%         % learning algorithm in a parameters structure:</span>
 <span class="c">%         params.edge_mask = zero_diag(Z &lt; 0.02);</span>
@@ -207,8 +207,8 @@
 <span class="c">%</span>
 <span class="c">%   Note that we can alternatively use the vector form of Z, W, and the</span>
 <span class="c">%   mask, but always AFTER symmetrizing the distance matrix Z. Make sure</span>
-<span class="c">%   you use our squareform_sp.m instead of Matlab&#39;s native squareform.m, or</span>
-<span class="c">%   for big graphs you might have memory issues:</span>
+<span class="c">%   you use our sparse version squareform_sp.m instead of Matlab&#39;s native</span>
+<span class="c">%   squareform.m, or for big graphs you might have memory issues:</span>
 <span class="c">% </span>
 <span class="c">%         z_sp = squareform_sp(Z_sp);</span>
 <span class="c">%         params.edge_mask = z_sp &gt; 0;</span>
@@ -328,7 +328,7 @@
 <span class="c">%% some problems, or just to reduce computations for others.</span>
 
 <span class="c">% Suppose for example that we know beforehand that no connection could or</span>
-<span class="c">% should be formed before pairs of nodes with distance more than 0.15. We</span>
+<span class="c">% should be formed before pairs of nodes with distance more than 0.02. We</span>
 <span class="c">% create a mask with the pattern of allowed edges and pass it to the</span>
 <span class="c">% learning algorithm in a parameters structure:</span>
 <span class="n">params</span><span class="p">.</span><span class="n">edge_mask</span> <span class="p">=</span> <span class="n">zero_diag</span><span class="p">(</span><span class="n">Z</span> <span class="o">&lt;</span> <span class="mf">0.02</span><span class="p">);</span>
@@ -404,8 +404,8 @@
 
 <span class="c">%% Note that we can alternatively use the vector form of Z, W, and the mask,</span>
 <span class="c">%% but always AFTER symmetrizing the distance matrix Z. Make sure you use </span>
-<span class="c">%% our squareform_sp.m instead of Matlab&#39;s native squareform.m, or for big </span>
-<span class="c">%% graphs you might have memory issues</span>
+<span class="c">%% our sparse version squareform_sp.m instead of Matlab&#39;s native squareform.m,</span>
+<span class="c">%% or for big graphs you might have memory issues</span>
 
 <span class="n">z_sp</span> <span class="p">=</span> <span class="n">squareform_sp</span><span class="p">(</span><span class="n">Z_sp</span><span class="p">);</span>
 <span class="n">params</span><span class="p">.</span><span class="n">edge_mask</span> <span class="p">=</span> <span class="n">z_sp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span>
