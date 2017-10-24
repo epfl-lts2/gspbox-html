@@ -29,7 +29,7 @@
             <div class="col-md-offset-5 col-md-5" id="jumplist">This is where navigation should be.</div>
         </div>
         <div class="row">
-        <div class="col-md-2">
+            <div class="col-md-2">
                 <div class="include" file='../include/docnav.html'></div>
                 <br/>
                 <div id="seealso"><p></p></div>
@@ -77,10 +77,10 @@
 <span class="k">try</span>
     <span class="n">outputdir</span> <span class="p">=</span> <span class="p">[</span><span class="n">GLOBAL_gsppath</span><span class="p">,</span><span class="n">FS</span><span class="p">,</span><span class="s">&#39;3rdparty&#39;</span><span class="p">];</span>
     <span class="k">if</span> <span class="n">isunix</span>
-        <span class="n">tarfilename</span> <span class="p">=</span> <span class="n">webread</span><span class="p">(</span><span class="s">&#39;http://lts2.epfl.ch/unlocbox/download_unix.php&#39;</span><span class="p">);</span>
+        <span class="n">tarfilename</span> <span class="p">=</span> <span class="n">webread</span><span class="p">(</span><span class="s">&#39;https://github.com/epfl-lts2/unlocbox/releases/download/1.7.4/unlocbox-1.7.4.tar.gz&#39;</span><span class="p">);</span>
         <span class="n">untar</span><span class="p">(</span><span class="n">tarfilename</span><span class="p">,</span><span class="n">outputdir</span><span class="p">)</span>        
     <span class="k">else</span>
-        <span class="n">zipfilename</span> <span class="p">=</span> <span class="n">webread</span><span class="p">(</span><span class="s">&#39;https://lts2.epfl.ch/unlocbox/download_win.php&#39;</span><span class="p">);</span>
+        <span class="n">zipfilename</span> <span class="p">=</span> <span class="n">webread</span><span class="p">(</span><span class="s">&#39;https://github.com/epfl-lts2/unlocbox/releases/download/1.7.4/unlocbox-1.7.4.zip&#39;</span><span class="p">);</span>
         <span class="n">unzip</span><span class="p">(</span><span class="n">zipfilename</span><span class="p">,</span><span class="n">outputdir</span><span class="p">)</span>
     <span class="k">end</span>
     <span class="n">fprintf</span><span class="p">(</span><span class="s">&#39;Installation sucessfull!\n\n&#39;</span><span class="p">)</span>
