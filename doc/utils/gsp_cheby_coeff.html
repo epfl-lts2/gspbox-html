@@ -89,7 +89,16 @@ c = gsp_cheby_coeff(G, filter);
 contained in the cell array filter. The coefficient are returned in a
 matrix. Every collumn correspond to a filter. The coefficients are
 ordered such that c(j+1) is j'th Chebyshev coefficient</p>
-<p><em>param</em> contain only one field param.verbose to controle the verbosity.</p>
+</div>
+<div class="section" id="additional-parameters">
+<h2>Additional parameters</h2>
+<ul class="simple">
+<li><em>param.use_chebfun</em>  : 1 to use the Chebfun package to compute
+Chebyshev coefficients</li>
+<li><em>param.splitting_on</em> : 1 to call chebfun with splitting on</li>
+<li><em>param.verbose</em> : Verbosity level (0 no log - 1 display warnings)
+(default 1).</li>
+</ul>
 <p>Example:</p>
 <pre class="literal-block">
 Nf = 4;

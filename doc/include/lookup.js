@@ -194,4 +194,4 @@ var globalfunlist = {
    gsp_wlog_scales:'filters/gsp_wlog_scales',
 };
 
- var toolboxversion='0.7.4'; 
+ var toolboxversion='0.7.5'; 

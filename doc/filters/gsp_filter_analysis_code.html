@@ -96,11 +96,13 @@
 <span class="c">%      &#39;lanczos&#39;   : Lanczos approximation</span>
 <span class="c">%     Default: if the Fourier matrix is present: &#39;exact&#39; otherwise &#39;cheby&#39;</span>
 <span class="c">%    param.order : Degree of the Chebyshev approximation</span>
-<span class="c">%     (default=30). </span>
+<span class="c">%     Default: 30</span>
+<span class="c">%    param.grid_order : grid order used to compute quadrature </span>
+<span class="c">%     Default: param.order+1</span>
 <span class="c">%    param.verbose : Verbosity level (0 no log - 1 display warnings)</span>
-<span class="c">%     (default 1).   </span>
+<span class="c">%     Default: 1   </span>
 <span class="c">%</span>
-<span class="c">%   See also: gsp_filter_synthesis gsp_filter_inverse</span>
+<span class="c">%   See also: gsp_filter_synthesis gsp_filter_inverse </span>
 <span class="c">% </span>
 <span class="c">%   References:</span>
 <span class="c">%     D. K. Hammond, P. Vandergheynst, and R. Gribonval. Wavelets on graphs</span>
@@ -112,7 +114,7 @@
 <span class="c">%   Url: https://epfl-lts2.github.io/gspbox-html/doc/filters/gsp_filter_analysis.html</span>
 
 <span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
-<span class="c">% This file is part of GSPbox version 0.7.4</span>
+<span class="c">% This file is part of GSPbox version 0.7.5</span>
 <span class="c">%</span>
 <span class="c">% This program is free software: you can redistribute it and/or modify</span>
 <span class="c">% it under the terms of the GNU General Public License as published by</span>
@@ -181,6 +183,7 @@
 <span class="k">end</span>
 
 <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;order&#39;</span><span class="p">);</span> <span class="n">param</span><span class="p">.</span><span class="n">order</span> <span class="p">=</span> <span class="mi">30</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;grid_order&#39;</span><span class="p">);</span> <span class="n">param</span><span class="p">.</span><span class="n">grid_order</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">order</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
 <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;verbose&#39;</span><span class="p">);</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
 
 <span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s">&#39;cheb_order&#39;</span><span class="p">)</span>
@@ -241,7 +244,7 @@
 
 
         <span class="n">cheb_coeffs</span> <span class="p">=</span> <span class="n">gsp_cheby_coeff</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">fi</span><span class="p">,</span><span class="c">...</span>
-                <span class="n">param</span><span class="p">.</span><span class="n">order</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">order</span> <span class="o">+</span><span class="mi">1</span><span class="p">);</span>      
+                <span class="n">param</span><span class="p">.</span><span class="n">order</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">grid_order</span><span class="p">,</span> <span class="n">param</span><span class="p">);</span>    
         <span class="n">c</span> <span class="p">=</span> <span class="n">gsp_cheby_op</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">cheb_coeffs</span><span class="p">,</span> <span class="n">s</span><span class="p">);</span>
 <span class="c">%     case &#39;cheby_p&#39;</span>
 <span class="c">% </span>
