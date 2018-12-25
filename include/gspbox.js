@@ -1,6 +1,7 @@
 // Get base URL
 var loc = window.location;
-var baseurl = loc.protocol + "//" + loc.host;
+// var baseurl = loc.protocol + "//" + loc.host;
+var baseurl = "https://" + loc.host;
 
 $(document).ready(function(){ 
     // Just to be sure
