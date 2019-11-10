@@ -81,11 +81,10 @@ r = gsp_cheby_op(G, c, signal)
 Chebyshev basis) applied to input.</p>
 <p>Coefficients for multiple polynomials may be passed as a matrix.
 This is equivalent to setting:</p>
-<pre class="literal-block">
+<blockquote>
 r(1) = gsp_cheby_op(G, c(:,1), signal);
 r(2) = gsp_cheby_op(G, c(:,2), signal);
-...
-</pre>
+...</blockquote>
 <p>but is more efficient as the Chebyshev polynomials of G.L applied
 to <em>signal</em> can be computed once and shared.</p>
 <p>The output <em>r</em> is a matrix with each column corresponding to a filter.</p>

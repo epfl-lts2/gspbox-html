@@ -77,39 +77,24 @@ G = gsp_compute_fourier_basis(G,param);
 <h2>Description</h2>
 <p>'gsp_compute_fourier_basis(G)' computes a full eigendecomposition of the graph
 Laplacian G.L:</p>
-<!-- L = U Lambda U* -->
-<div class="math">
-\begin{equation*}
-{\cal L} = U \Lambda U^*
-\end{equation*}
-</div>
-<p>where <span class="math">\(\Lambda\)</span> is a diagonal matrix of the Laplacian eigenvalues.
-<em>G.e</em> is a column vector of length <em>G.N</em> containing the Laplacian
-eigenvalues. The function will store the basis <em>U</em>, the eigenvalues
-<em>e</em>, the maximum eigenvalue <em>lmax</em> and <em>G.mu</em> the coherence of the
-Fourier basis into the structure <em>G</em>.</p>
+<blockquote>
+L = U Lambda U*</blockquote>
+<p>where Lambda is a diagonal matrix of the Laplacian eigenvalues.
+G.e is a column vector of length G.N containing the Laplacian
+eigenvalues. The function will store the basis U, the eigenvalues
+e, the maximum eigenvalue lmax and G.mu the coherence of the
+Fourier basis into the structure G.</p>
 <p>Example:</p>
-<pre class="literal-block">
+<blockquote>
+<blockquote>
 N = 50;
 G = gsp_sensor(N);
 G = gsp_compute_fourier_basis(G);
-gsp_plot_signal(G,G.U(:,2));
-</pre>
-<img alt="gsp_compute_fourier_basis_1_1.png" class="align-center" src="gsp_compute_fourier_basis_1_1.png" />
+gsp_plot_signal(G,G.U(:,2));</blockquote>
+<p>F. R. K. Chung. Spectral Graph Theory. Vol. 92 of the CBMS Regional
+Conference Series in Mathematics, American Mathematical Society, 1997.</p>
+</blockquote>
 </div>
-<H2>References:</H2>
-
-
-
-<p><a name="chung1997spectral"></a>
-
-F.&nbsp;R.&nbsp;K. Chung.
- <em>Spectral Graph Theory</em>.
- Vol. 92 of the CBMS Regional Conference Series in Mathematics,
-  American Mathematical Society, 1997.
-
-</p>
-
 
             </div>
         </div>

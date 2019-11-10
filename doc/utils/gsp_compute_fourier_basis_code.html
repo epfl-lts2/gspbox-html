@@ -72,34 +72,8 @@
 <span class="c">%     F. R. K. Chung. Spectral Graph Theory. Vol. 92 of the CBMS Regional</span>
 <span class="c">%     Conference Series in Mathematics, American Mathematical Society, 1997.</span>
 <span class="c">%     </span>
-<span class="c">%     </span>
-<span class="c">%</span>
-<span class="c">%</span>
-<span class="c">%   Url: https://epfl-lts2.github.io/gspbox-html/doc/utils/gsp_compute_fourier_basis.html</span>
 
-<span class="c">% Copyright (C) 2013-2016 Nathanael Perraudin, Johan Paratte, David I Shuman.</span>
-<span class="c">% This file is part of GSPbox version 0.7.5</span>
-<span class="c">%</span>
-<span class="c">% This program is free software: you can redistribute it and/or modify</span>
-<span class="c">% it under the terms of the GNU General Public License as published by</span>
-<span class="c">% the Free Software Foundation, either version 3 of the License, or</span>
-<span class="c">% (at your option) any later version.</span>
-<span class="c">%</span>
-<span class="c">% This program is distributed in the hope that it will be useful,</span>
-<span class="c">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
-<span class="c">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
-<span class="c">% GNU General Public License for more details.</span>
-<span class="c">%</span>
-<span class="c">% You should have received a copy of the GNU General Public License</span>
-<span class="c">% along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-
-<span class="c">% If you use this toolbox please kindly cite</span>
-<span class="c">%     N. Perraudin, J. Paratte, D. Shuman, V. Kalofolias, P. Vandergheynst,</span>
-<span class="c">%     and D. K. Hammond. GSPBOX: A toolbox for signal processing on graphs.</span>
-<span class="c">%     ArXiv e-prints, Aug. 2014.</span>
-<span class="c">% http://arxiv.org/abs/1408.5781</span>
-
-<span class="c">% Author : David I Shuman, Nathanael Perraudin</span>
+<span class="c">% Author : David I Shuman, Nathanael Perraudin, Li Fan</span>
 <span class="c">% Testing: test_operators</span>
 
 <span class="k">if</span> <span class="n">nargin</span> <span class="o">&lt;</span> <span class="mi">2</span>
@@ -116,6 +90,7 @@
 <span class="k">end</span>
 
 <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;verbose&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">verbose</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span> <span class="k">end</span>
+<span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="s">&#39;force_svd&#39;</span><span class="p">),</span> <span class="n">param</span><span class="p">.</span><span class="n">force_svd</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> <span class="k">end</span>
 
 
 
@@ -155,7 +130,7 @@
     <span class="k">if</span> <span class="o">~</span><span class="n">isfield</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&#39;L&#39;</span><span class="p">)</span>
         <span class="n">error</span><span class="p">(</span><span class="s">&#39;Graph Laplacian is not provided.&#39;</span><span class="p">);</span>
     <span class="k">end</span>
-    <span class="p">[</span><span class="n">G</span><span class="p">.</span><span class="n">U</span><span class="p">,</span> <span class="n">G</span><span class="p">.</span><span class="n">e</span><span class="p">]</span> <span class="p">=</span> <span class="n">gsp_full_eigen</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">L</span><span class="p">);</span>
+    <span class="p">[</span><span class="n">G</span><span class="p">.</span><span class="n">U</span><span class="p">,</span> <span class="n">G</span><span class="p">.</span><span class="n">e</span><span class="p">]</span> <span class="p">=</span> <span class="n">gsp_full_eigen</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">L</span><span class="p">,</span><span class="n">param</span><span class="p">);</span>
 <span class="k">end</span>
 
 <span class="n">G</span><span class="p">.</span><span class="n">lmax</span><span class="p">=</span><span class="n">max</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">e</span><span class="p">);</span>
@@ -171,16 +146,20 @@
 <span class="k">end</span>
 
 
-<span class="k">function</span><span class="w"> </span>[U,E] <span class="p">=</span><span class="w"> </span><span class="nf">gsp_full_eigen</span><span class="p">(</span>L<span class="p">)</span><span class="w"></span>
+<span class="k">function</span><span class="w"> </span>[U,E] <span class="p">=</span><span class="w"> </span><span class="nf">gsp_full_eigen</span><span class="p">(</span>L, param<span class="p">)</span><span class="w"> </span>
 <span class="c">%GSP_FULL_EIGEN Compute and order the eigen decomposition of L</span>
 
-    <span class="c">% Compute and all eigenvalues and eigenvectors </span>
-<span class="c">%     try</span>
-<span class="c">%         [eigenvectors,eigenvalues]=eig(full(L+L&#39;)/2);</span>
-<span class="c">%     catch</span>
+    <span class="c">% Compute and all eigenvalues and eigenvectors</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">force_svd</span>
         <span class="p">[</span><span class="n">eigenvectors</span><span class="p">,</span><span class="n">eigenvalues</span><span class="p">,</span><span class="o">~</span><span class="p">]=</span><span class="n">svd</span><span class="p">(</span><span class="n">full</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="n">L</span><span class="o">&#39;</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
-<span class="c">%     end</span>
-    
+    <span class="k">else</span>   
+        <span class="k">try</span>
+            <span class="p">[</span><span class="n">eigenvectors</span><span class="p">,</span><span class="n">eigenvalues</span><span class="p">]=</span><span class="n">eig</span><span class="p">(</span><span class="n">full</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="n">L</span><span class="o">&#39;</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+        <span class="k">catch</span>
+            <span class="p">[</span><span class="n">eigenvectors</span><span class="p">,</span><span class="n">eigenvalues</span><span class="p">,</span><span class="o">~</span><span class="p">]=</span><span class="n">svd</span><span class="p">(</span><span class="n">full</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="n">L</span><span class="o">&#39;</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+
     <span class="c">% Sort eigenvectors and eigenvalues</span>
     <span class="p">[</span><span class="n">E</span><span class="p">,</span><span class="n">inds</span><span class="p">]</span> <span class="p">=</span> <span class="n">sort</span><span class="p">(</span><span class="nb">diag</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">),</span><span class="s">&#39;ascend&#39;</span><span class="p">);</span>
     <span class="n">eigenvectors</span><span class="p">=</span><span class="n">eigenvectors</span><span class="p">(:,</span><span class="n">inds</span><span class="p">);</span>
